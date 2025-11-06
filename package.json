@@ -1,6 +1,6 @@
 {
-  "name": "frontiertower-frontier-sdk",
-  "version": "0.1.0",
+  "name": "@frontiertower/frontier-sdk",
+  "version": "0.1.4",
   "description": "SDK for building apps on Frontier Wallet",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -46,5 +46,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/frontiertower/frontier-sdk.git"
-  }
+  },
+  "readme": "README.md"
 }
