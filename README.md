@@ -9,14 +9,14 @@ Check out [**frontier-kickstarter**](https://github.com/BerlinhouseLabs/frontier
 ## Installation
 
 ```bash
-npm install @frontier-wallet/sdk
+npm install @frontiertower/frontier-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { FrontierSDK } from '@frontier-wallet/sdk';
-import { isInFrontierApp, renderStandaloneMessage } from '@frontier-wallet/sdk/ui-utils';
+import { FrontierSDK } from '@frontiertower/frontier-sdk';
+import { isInFrontierApp, renderStandaloneMessage } from '@frontiertower/frontier-sdk/ui-utils';
 
 // Initialize the SDK
 const sdk = new FrontierSDK();
