@@ -57,7 +57,6 @@ Your app must declare required permissions in the Frontier app registry:
 - `storage:set` - Write to storage
 - `storage:remove` - Remove from storage
 - `storage:clear` - Clear all storage
-- `storage:*` - Full storage access (wildcard for all storage methods)
 
 ### User Permissions
 - `user:getDetails` - Access current user details

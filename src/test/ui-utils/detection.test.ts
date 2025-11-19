@@ -25,9 +25,23 @@ describe('UI Utils - Detection', () => {
   });
 
   describe('isInFrontierApp', () => {
-    it('should return false when not in iframe (parent === window)', () => {
-      Object.defineProperty(window, 'parent', {
-        value: window,
+    let originalTop: Window;
+
+    beforeEach(() => {
+      originalTop = window.top as Window;
+    });
+
+    afterEach(() => {
+      Object.defineProperty(window, 'top', {
+        value: originalTop,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('should return false when not in iframe (self === top)', () => {
+      Object.defineProperty(window, 'top', {
+        value: window.self,
         writable: true,
         configurable: true,
       });
@@ -35,16 +49,10 @@ describe('UI Utils - Detection', () => {
       expect(isInFrontierApp()).toBe(false);
     });
 
-    it('should return true for localhost:5173 origin', () => {
-      // Mock parent window
-      const mockParent = {
-        location: {
-          origin: 'http://localhost:5173',
-        },
-      };
-
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
+    it('should return true when in iframe (self !== top)', () => {
+      const mockTop = {};
+      Object.defineProperty(window, 'top', {
+        value: mockTop,
         writable: true,
         configurable: true,
       });
@@ -52,113 +60,15 @@ describe('UI Utils - Detection', () => {
       expect(isInFrontierApp()).toBe(true);
     });
 
-    it('should return true for production origin', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: 'https://wallet.frontiertower.io/apps/test',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {};
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
+    it('should return true for any iframe regardless of origin', () => {
+      const mockTop = {};
+      Object.defineProperty(window, 'top', {
+        value: mockTop,
         writable: true,
         configurable: true,
       });
 
       expect(isInFrontierApp()).toBe(true);
-    });
-
-    it('should return true for sandbox origin', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: 'https://sandbox.wallet.frontiertower.io/apps/test',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {};
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true,
-      });
-
-      expect(isInFrontierApp()).toBe(true);
-    });
-
-    it('should return true for alpha origin', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: 'https://alpha.wallet.frontiertower.io/apps/test',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {};
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true,
-      });
-
-      expect(isInFrontierApp()).toBe(true);
-    });
-
-    it('should return true for beta origin', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: 'https://beta.wallet.frontiertower.io/apps/test',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {};
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true,
-      });
-
-      expect(isInFrontierApp()).toBe(true);
-    });
-
-    it('should return false for unauthorized origin', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: 'https://evil.com/apps/test',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {};
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true,
-      });
-
-      expect(isInFrontierApp()).toBe(false);
-    });
-
-    it('should return false when no referrer and cross-origin parent', () => {
-      Object.defineProperty(document, 'referrer', {
-        value: '',
-        writable: true,
-        configurable: true,
-      });
-
-      const mockParent = {
-        location: {
-          get origin() {
-            throw new Error('Cross-origin access blocked');
-          },
-        },
-      };
-
-      Object.defineProperty(window, 'parent', {
-        value: mockParent,
-        writable: true,
-        configurable: true,
-      });
-
-      expect(isInFrontierApp()).toBe(false);
     });
   });
 

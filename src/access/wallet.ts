@@ -310,19 +310,18 @@ export class WalletAccess {
    * 
    * @example
    * ```typescript
-   * const receipt = await sdk.getWallet().transferFrontierDollar({
-   *   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   amount: '10.5' // 10.5 Frontier Dollars
-   * });
+   * const receipt = await sdk.getWallet().transferFrontierDollar(
+   *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+   *   '10.5' // 10.5 Frontier Dollars
+   * );
    * console.log('Transaction:', receipt.transactionHash);
    * ```
    */
-  async transferFrontierDollar(payload: {
-    to: string;
-    amount: string;
-    overrides?: GasOverrides;
-  }): Promise<UserOperationReceipt> {
-    const { to, amount, overrides } = payload;
+  async transferFrontierDollar(
+    to: string,
+    amount: string,
+    overrides?: GasOverrides
+  ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferFrontierDollar', {
       to,
       amount,

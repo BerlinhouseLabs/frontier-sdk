@@ -428,6 +428,79 @@ describe('WalletAccess', () => {
     });
   });
 
+  describe('transferFrontierDollar', () => {
+    const toAddress = '0x2222222222222222222222222222222222222222';
+    const amount = '10.5';
+    
+    const mockReceipt: UserOperationReceipt = {
+      userOpHash: '0xhash',
+      transactionHash: '0xtxhash',
+      blockNumber: 12345n,
+      success: true,
+    };
+
+    it('should call SDK request with wallet:transferFrontierDollar type', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+
+      const result = await wallet.transferFrontierDollar(toAddress, amount);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides: undefined,
+      });
+      expect(result).toEqual(mockReceipt);
+    });
+
+    it('should support gas overrides', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+      const overrides: GasOverrides = {
+        maxFeePerGas: 1000000n,
+        maxPriorityFeePerGas: 50000n,
+      };
+
+      await wallet.transferFrontierDollar(toAddress, amount, overrides);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides,
+      });
+    });
+
+    it('should handle different amount formats', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+      const wholeAmount = '100';
+
+      await wallet.transferFrontierDollar(toAddress, wholeAmount);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
+        to: toAddress,
+        amount: wholeAmount,
+        overrides: undefined,
+      });
+    });
+
+    it('should handle decimal amounts', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+      const decimalAmount = '0.01';
+
+      await wallet.transferFrontierDollar(toAddress, decimalAmount);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
+        to: toAddress,
+        amount: decimalAmount,
+        overrides: undefined,
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Insufficient balance'));
+
+      await expect(wallet.transferFrontierDollar(toAddress, amount)).rejects.toThrow('Insufficient balance');
+    });
+  });
+
   describe('Integration', () => {
     it('should support sequential wallet operations', async () => {
       mockRequest
