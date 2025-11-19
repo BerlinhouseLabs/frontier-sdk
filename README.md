@@ -49,6 +49,7 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:transferERC20` - Transfer ERC20 tokens
 - `wallet:approveERC20` - Approve ERC20 token spending
 - `wallet:transferNative` - Transfer native currency (ETH)
+- `wallet:transferFrontierDollar` - Transfer Frontier Dollars
 - `wallet:executeCall` - Execute arbitrary contract calls
 
 ### Storage Permissions

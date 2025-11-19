@@ -295,4 +295,38 @@ export class WalletAccess {
       overrides,
     });
   }
+
+  /**
+   * Transfer Frontier Dollars to another address
+   * 
+   * Sends Frontier Dollars (the native stablecoin) to a recipient address.
+   * Requires biometric authentication and sufficient balance.
+   * 
+   * @param to - Recipient address
+   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param overrides - Optional gas overrides
+   * @returns User operation receipt with transaction details
+   * @throws {Error} If insufficient balance or transaction fails
+   * 
+   * @example
+   * ```typescript
+   * const receipt = await sdk.getWallet().transferFrontierDollar({
+   *   to: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+   *   amount: '10.5' // 10.5 Frontier Dollars
+   * });
+   * console.log('Transaction:', receipt.transactionHash);
+   * ```
+   */
+  async transferFrontierDollar(payload: {
+    to: string;
+    amount: string;
+    overrides?: GasOverrides;
+  }): Promise<UserOperationReceipt> {
+    const { to, amount, overrides } = payload;
+    return this.sdk.request('wallet:transferFrontierDollar', {
+      to,
+      amount,
+      overrides,
+    });
+  }
 }
