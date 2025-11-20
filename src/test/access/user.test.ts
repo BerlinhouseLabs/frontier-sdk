@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { UserAccess, type User, type UserProfile } from '../../access/user';
+import { 
+  UserAccess, 
+  type User, 
+  type UserProfile,
+  type ReferralOverview,
+  type ReferralDetails,
+  type UserContactPayload,
+  type PaginatedResponse
+} from '../../access/user';
 import type { FrontierSDK } from '../../sdk';
 
 describe('UserAccess', () => {
@@ -73,7 +81,7 @@ describe('UserAccess', () => {
   });
 
   describe('getProfile', () => {
-    it('should request user profile by ID', async () => {
+    it('should request current user profile', async () => {
       const mockProfile: UserProfile = {
         id: 456,
         user: 123,
@@ -106,9 +114,9 @@ describe('UserAccess', () => {
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockProfile);
 
-      const result = await userAccess.getProfile(456);
+      const result = await userAccess.getProfile();
 
-      expect(mockSDK.request).toHaveBeenCalledWith('user:getProfile', { id: 456 });
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getProfile');
       expect(result).toEqual(mockProfile);
     });
 
@@ -145,7 +153,7 @@ describe('UserAccess', () => {
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockProfile);
 
-      const result = await userAccess.getProfile(789);
+      const result = await userAccess.getProfile();
 
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('user');
@@ -161,13 +169,192 @@ describe('UserAccess', () => {
     it('should throw error if profile not found', async () => {
       vi.mocked(mockSDK.request).mockRejectedValue(new Error('Profile not found'));
 
-      await expect(userAccess.getProfile(999)).rejects.toThrow('Profile not found');
+      await expect(userAccess.getProfile()).rejects.toThrow('Profile not found');
     });
 
-    it('should throw error if access is denied', async () => {
-      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Access denied'));
+    it('should throw error if not authenticated', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
 
-      await expect(userAccess.getProfile(123)).rejects.toThrow('Access denied');
+      await expect(userAccess.getProfile()).rejects.toThrow('Not authenticated');
+    });
+  });
+
+  describe('getReferralOverview', () => {
+    it('should request referral overview for current user', async () => {
+      const mockOverview: ReferralOverview = {
+        totalReferrals: 10,
+        activeReferrals: 7,
+        totalRewards: 500,
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockOverview);
+
+      const result = await userAccess.getReferralOverview();
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getReferralOverview');
+      expect(result).toEqual(mockOverview);
+    });
+
+    it('should return overview with all fields', async () => {
+      const mockOverview: ReferralOverview = {
+        totalReferrals: 25,
+        activeReferrals: 15,
+        totalRewards: 1250,
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockOverview);
+
+      const result = await userAccess.getReferralOverview();
+
+      expect(result).toHaveProperty('totalReferrals');
+      expect(result).toHaveProperty('activeReferrals');
+      expect(result).toHaveProperty('totalRewards');
+      expect(result.totalReferrals).toBe(25);
+      expect(result.activeReferrals).toBe(15);
+      expect(result.totalRewards).toBe(1250);
+    });
+
+    it('should throw error if not authenticated', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
+
+      await expect(userAccess.getReferralOverview()).rejects.toThrow('Not authenticated');
+    });
+  });
+
+  describe('getReferralDetails', () => {
+    it('should request referral details without pagination', async () => {
+      const mockDetails: PaginatedResponse<ReferralDetails> = {
+        count: 2,
+        results: [
+          {
+            id: 'ref1',
+            email: 'user1@example.com',
+            status: 'active',
+            createdAt: '2024-01-01T00:00:00Z',
+            reward: 50,
+          },
+          {
+            id: 'ref2',
+            email: 'user2@example.com',
+            status: 'pending',
+            createdAt: '2024-01-02T00:00:00Z',
+          },
+        ],
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockDetails);
+
+      const result = await userAccess.getReferralDetails();
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getReferralDetails', undefined);
+      expect(result).toEqual(mockDetails);
+      expect(result.count).toBe(2);
+      expect(result.results).toHaveLength(2);
+    });
+
+    it('should request referral details with pagination', async () => {
+      const mockDetails: PaginatedResponse<ReferralDetails> = {
+        count: 50,
+        results: [
+          {
+            id: 'ref21',
+            email: 'user21@example.com',
+            status: 'active',
+            createdAt: '2024-01-21T00:00:00Z',
+            reward: 50,
+          },
+        ],
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockDetails);
+
+      const result = await userAccess.getReferralDetails(2);
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getReferralDetails', { page: 2 });
+      expect(result).toEqual(mockDetails);
+    });
+
+    it('should return paginated response structure', async () => {
+      const mockDetails: PaginatedResponse<ReferralDetails> = {
+        count: 100,
+        results: [],
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockDetails);
+
+      const result = await userAccess.getReferralDetails(5);
+
+      expect(result).toHaveProperty('count');
+      expect(result).toHaveProperty('results');
+      expect(Array.isArray(result.results)).toBe(true);
+    });
+
+    it('should throw error if not authenticated', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
+
+      await expect(userAccess.getReferralDetails()).rejects.toThrow('Not authenticated');
+    });
+  });
+
+  describe('addUserContact', () => {
+    it('should add user contact information', async () => {
+      const contactData: UserContactPayload = {
+        email: 'contact@example.com',
+        phoneNumber: '+1234567890',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(undefined);
+
+      await userAccess.addUserContact(contactData);
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:addUserContact', contactData);
+    });
+
+    it('should handle contact data with only email', async () => {
+      const contactData: UserContactPayload = {
+        email: 'newemail@example.com',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(undefined);
+
+      await userAccess.addUserContact(contactData);
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:addUserContact', contactData);
+    });
+
+    it('should handle contact data with additional fields', async () => {
+      const contactData: UserContactPayload = {
+        email: 'contact@example.com',
+        phoneNumber: '+1234567890',
+        preferredContact: 'email',
+        notes: 'Important contact',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(undefined);
+
+      await userAccess.addUserContact(contactData);
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:addUserContact', contactData);
+    });
+
+    it('should throw error if not authenticated', async () => {
+      const contactData: UserContactPayload = {
+        email: 'contact@example.com',
+      };
+
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
+
+      await expect(userAccess.addUserContact(contactData)).rejects.toThrow('Not authenticated');
+    });
+
+    it('should throw error if data is invalid', async () => {
+      const contactData: UserContactPayload = {
+        email: 'invalid-email',
+      };
+
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Invalid email format'));
+
+      await expect(userAccess.addUserContact(contactData)).rejects.toThrow('Invalid email format');
     });
   });
 });

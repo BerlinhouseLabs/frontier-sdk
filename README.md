@@ -60,7 +60,10 @@ Your app must declare required permissions in the Frontier app registry:
 
 ### User Permissions
 - `user:getDetails` - Access current user details
-- `user:getProfile` - Access user profile information
+- `user:getProfile` - Access current user profile information
+- `user:getReferralOverview` - Access referral statistics
+- `user:getReferralDetails` - Access detailed referral information
+- `user:addUserContact` - Add user contact information
 
 ### Chain Permissions
 - `chain:getCurrentNetwork` - Get current network name

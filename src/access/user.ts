@@ -77,11 +77,63 @@ export interface UserProfile {
 }
 
 /**
+ * Paginated response wrapper
+ */
+export interface PaginatedResponse<T> {
+  /** Total count of items */
+  count: number;
+  /** Array of results */
+  results: T[];
+}
+
+/**
+ * Referral overview statistics
+ */
+export interface ReferralOverview {
+  /** Total number of referrals */
+  totalReferrals: number;
+  /** Number of active referrals */
+  activeReferrals: number;
+  /** Total rewards earned */
+  totalRewards: number;
+}
+
+/**
+ * Detailed referral information
+ */
+export interface ReferralDetails {
+  /** Referral ID */
+  id: string;
+  /** Referred user email */
+  email: string;
+  /** Referral status */
+  status: string;
+  /** Date of referral */
+  createdAt: string;
+  /** Reward amount */
+  reward?: number;
+}
+
+/**
+ * User contact information payload
+ */
+export interface UserContactPayload {
+  /** Contact email */
+  email?: string;
+  /** Contact phone number */
+  phoneNumber?: string;
+  /** Additional contact information */
+  [key: string]: any;
+}
+
+/**
  * User access class for interacting with user information
  * 
  * This class provides methods to:
  * - Get current user details
  * - Get detailed user profiles
+ * - Access referral information
+ * - Add user contact information
  * 
  * All methods require appropriate permissions and authentication.
  */
@@ -109,24 +161,91 @@ export class UserAccess {
   }
 
   /**
-   * Get user profile by ID
+   * Get current user profile
    * 
-   * Returns detailed profile information for a specific user,
+   * Returns detailed profile information for the currently authenticated user,
    * including social media handles, preferences, and community information.
    * 
-   * @param id - The profile ID to fetch
    * @returns UserProfile object with detailed information
-   * @throws {Error} If profile is not found or access is denied
+   * @throws {Error} If user is not authenticated or profile is not found
    * 
    * @example
    * ```typescript
-   * const profile = await sdk.getUser().getProfile(123);
+   * const profile = await sdk.getUser().getProfile();
    * console.log('Nickname:', profile.nickname);
    * console.log('GitHub:', profile.githubHandle);
    * console.log('Community:', profile.communityName);
    * ```
    */
-  async getProfile(id: number): Promise<UserProfile> {
-    return this.sdk.request('user:getProfile', { id });
+  async getProfile(): Promise<UserProfile> {
+    return this.sdk.request('user:getProfile');
+  }
+
+  /**
+   * Get referral overview for current user
+   * 
+   * Returns statistics about the user's referrals, including total count,
+   * active referrals, and total rewards earned.
+   * 
+   * @returns ReferralOverview object with referral statistics
+   * @throws {Error} If user is not authenticated
+   * 
+   * @example
+   * ```typescript
+   * const overview = await sdk.getUser().getReferralOverview();
+   * console.log('Total referrals:', overview.totalReferrals);
+   * console.log('Total rewards:', overview.totalRewards);
+   * ```
+   */
+  async getReferralOverview(): Promise<ReferralOverview> {
+    return this.sdk.request('user:getReferralOverview');
+  }
+
+  /**
+   * Get referral details for current user with optional pagination
+   * 
+   * Returns detailed information about each referral, including status,
+   * date, and rewards. Supports pagination for large result sets.
+   * 
+   * @param page - Optional page number for pagination (1-indexed)
+   * @returns Paginated response with referral details
+   * @throws {Error} If user is not authenticated
+   * 
+   * @example
+   * ```typescript
+   * const details = await sdk.getUser().getReferralDetails();
+   * console.log('Total referrals:', details.count);
+   * details.results.forEach(ref => {
+   *   console.log(`${ref.email} - ${ref.status}`);
+   * });
+   * 
+   * // With pagination
+   * const page2 = await sdk.getUser().getReferralDetails(2);
+   * ```
+   */
+  async getReferralDetails(page?: number): Promise<PaginatedResponse<ReferralDetails>> {
+    return this.sdk.request('user:getReferralDetails', page ? { page } : undefined);
+  }
+
+  /**
+   * Add user contact information
+   * 
+   * Submits contact information for the current user. This can include
+   * email, phone number, or other contact details.
+   * 
+   * @param data - Contact information payload
+   * @returns Promise that resolves when contact is added
+   * @throws {Error} If user is not authenticated or data is invalid
+   * 
+   * @example
+   * ```typescript
+   * await sdk.getUser().addUserContact({
+   *   email: 'contact@example.com',
+   *   phoneNumber: '+1234567890'
+   * });
+   * ```
+   */
+  async addUserContact(data: UserContactPayload): Promise<void> {
+    return this.sdk.request('user:addUserContact', data);
   }
 }
