@@ -5,15 +5,21 @@ import type { FrontierSDK } from '../sdk';
  */
 export interface User {
   /** Unique user identifier */
-  id: string;
+  id: number;
   /** User's email address */
   email: string;
-  /** User's first name (optional) */
-  firstName?: string;
-  /** User's last name (optional) */
-  lastName?: string;
-  /** Username (optional) */
-  username?: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
+  /** Whether user is active */
+  isActive: boolean;
+  /** Date user joined */
+  dateJoined: string;
+  /** Whether user is staff */
+  isStaff: boolean;
+  /** Whether user is superuser */
+  isSuperuser: boolean;
 }
 
 /**
@@ -91,11 +97,15 @@ export interface PaginatedResponse<T> {
  */
 export interface ReferralOverview {
   /** Total number of referrals */
-  totalReferrals: number;
-  /** Number of active referrals */
-  activeReferrals: number;
-  /** Total rewards earned */
-  totalRewards: number;
+  referralCount: number;
+  /** User's ranking */
+  ranking: number;
+  /** Referral link */
+  referralLink: string;
+  /** Referral code */
+  referralCode: string;
+  /** Who referred this user */
+  referredBy: string | null;
 }
 
 /**
@@ -103,27 +113,35 @@ export interface ReferralOverview {
  */
 export interface ReferralDetails {
   /** Referral ID */
-  id: string;
+  id: number;
   /** Referred user email */
   email: string;
-  /** Referral status */
-  status: string;
-  /** Date of referral */
-  createdAt: string;
-  /** Reward amount */
-  reward?: number;
+  /** First name */
+  firstName: string;
+  /** Last name */
+  lastName: string;
+  /** Date user joined */
+  dateJoined: string;
+}
+
+/**
+ * Single contact entry
+ */
+export interface UserContact {
+  /** Contact email */
+  email: string;
+  /** Contact phone number */
+  phone: string;
+  /** Contact name */
+  name: string;
 }
 
 /**
  * User contact information payload
  */
 export interface UserContactPayload {
-  /** Contact email */
-  email?: string;
-  /** Contact phone number */
-  phoneNumber?: string;
-  /** Additional contact information */
-  [key: string]: any;
+  /** Array of contacts */
+  contacts: UserContact[];
 }
 
 /**
@@ -224,7 +242,7 @@ export class UserAccess {
    * ```
    */
   async getReferralDetails(page?: number): Promise<PaginatedResponse<ReferralDetails>> {
-    return this.sdk.request('user:getReferralDetails', page ? { page } : undefined);
+    return this.sdk.request('user:getReferralDetails', page);
   }
 
   /**

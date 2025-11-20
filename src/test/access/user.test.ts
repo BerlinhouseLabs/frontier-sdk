@@ -270,7 +270,7 @@ describe('UserAccess', () => {
 
       const result = await userAccess.getReferralDetails(2);
 
-      expect(mockSDK.request).toHaveBeenCalledWith('user:getReferralDetails', { page: 2 });
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getReferralDetails', 2);
       expect(result).toEqual(mockDetails);
     });
 

@@ -19,4 +19,13 @@ export type {
 export type {
   User,
   UserProfile,
+  PaginatedResponse,
+  ReferralOverview,
+  ReferralDetails,
+  UserContact,
+  UserContactPayload,
 } from './access/user';
+
+// Export UI utilities
+export { isInFrontierApp, getParentOrigin } from './ui-utils/detection';
+export { renderStandaloneMessage, createStandaloneHTML } from './ui-utils/standalone';
