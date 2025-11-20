@@ -112,16 +112,16 @@ export interface ReferralOverview {
  * Detailed referral information
  */
 export interface ReferralDetails {
-  /** Referral ID */
-  id: number;
-  /** Referred user email */
+  /** Name of the referred user */
+  name: string;
+  /** Email of the referred user */
   email: string;
-  /** First name */
-  firstName: string;
-  /** Last name */
-  lastName: string;
-  /** Date user joined */
-  dateJoined: string;
+  /** Date when the referral was made */
+  referralDate: string;
+  /** Reward information (if any) */
+  reward: string;
+  /** Status of the referral */
+  status: string;
 }
 
 /**
