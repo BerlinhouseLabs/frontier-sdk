@@ -8,7 +8,12 @@ export type {
   UserOperationReceipt,
   GasOverrides,
   ExecuteCall,
+  SwapParams,
+  SwapResult,
+  SwapQuote,
 } from './access/wallet';
+
+export { SwapResultStatus } from './access/wallet';
 
 // Export chain types
 export type {

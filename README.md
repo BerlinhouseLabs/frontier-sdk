@@ -51,6 +51,10 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:transferNative` - Transfer native currency (ETH)
 - `wallet:transferFrontierDollar` - Transfer Frontier Dollars
 - `wallet:executeCall` - Execute arbitrary contract calls
+- `wallet:executeBatchCall` - Execute multiple contract calls atomically
+- `wallet:getSupportedTokens` - Get list of supported tokens for swaps
+- `wallet:swap` - Execute token swaps (same-chain or cross-chain)
+- `wallet:quoteSwap` - Get quotes for token swaps
 
 ### Storage Permissions
 - `storage:get` - Read from storage

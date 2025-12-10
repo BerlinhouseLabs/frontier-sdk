@@ -59,6 +59,64 @@ export interface ExecuteCall {
 }
 
 /**
+ * Swap parameters for token swaps
+ */
+export interface SwapParams {
+  /** Symbol of the token to swap from (e.g., 'USDC') */
+  sourceToken: string;
+  /** Symbol of the token to swap to (e.g., 'WETH') */
+  targetToken: string;
+  /** Network identifier for source chain (e.g., 'base') */
+  sourceNetwork: string;
+  /** Network identifier for target chain (e.g., 'ethereum') */
+  targetNetwork: string;
+  /** Amount to swap in human-readable format (e.g., '100.5') */
+  amount: string;
+}
+
+/**
+ * Swap result status
+ */
+export enum SwapResultStatus {
+  COMPLETED = 'COMPLETED',
+  SUBMITTED = 'SUBMITTED',
+}
+
+/**
+ * Result of a swap operation
+ */
+export interface SwapResult {
+  /** Source chain configuration */
+  sourceChain: object;
+  /** Target chain configuration */
+  targetChain: object;
+  /** Source token configuration */
+  sourceToken: object;
+  /** Target token configuration */
+  targetToken: object;
+  /** Status of the swap */
+  status: SwapResultStatus;
+}
+
+/**
+ * Quote for a swap operation
+ */
+export interface SwapQuote {
+  /** Source chain configuration */
+  sourceChain: object;
+  /** Target chain configuration */
+  targetChain: object;
+  /** Source token configuration */
+  sourceToken: object;
+  /** Target token configuration */
+  targetToken: object;
+  /** Expected output amount in human-readable format */
+  expectedAmountOut: string;
+  /** Minimum output amount in human-readable format */
+  minAmountOut: string;
+}
+
+/**
  * Wallet access class for interacting with the user's wallet
  * 
  * This class provides methods to:
@@ -326,6 +384,145 @@ export class WalletAccess {
       to,
       amount,
       overrides,
+    });
+  }
+
+  /**
+   * Execute multiple calls atomically with a single signature
+   * 
+   * Executes multiple contract interactions in a single transaction.
+   * All calls are executed atomically - if one fails, all fail.
+   * 
+   * @param calls - Array of execute call parameters
+   * @param overrides - Optional gas overrides
+   * @returns User operation receipt with transaction details
+   * @throws {Error} If any transaction fails
+   * 
+   * @example
+   * ```typescript
+   * import { encodeFunctionData } from 'viem';
+   * 
+   * const receipt = await sdk.getWallet().executeBatchCall([
+   *   {
+   *     to: '0xToken1',
+   *     value: 0n,
+   *     data: encodeFunctionData({ abi: erc20Abi, functionName: 'approve', args: [...] })
+   *   },
+   *   {
+   *     to: '0xProtocol',
+   *     value: 0n,
+   *     data: encodeFunctionData({ abi: protocolAbi, functionName: 'deposit', args: [...] })
+   *   }
+   * ]);
+   * ```
+   */
+  async executeBatchCall(
+    calls: ExecuteCall[],
+    overrides?: GasOverrides
+  ): Promise<UserOperationReceipt> {
+    return this.sdk.request('wallet:executeBatchCall', {
+      calls,
+      overrides,
+    });
+  }
+
+  /**
+   * Get list of supported token symbols for the current chain
+   * 
+   * Returns an array of token symbols that are supported for swaps
+   * and other operations on the current network.
+   * 
+   * @returns Array of token symbols (e.g., ['FTD', 'USDC', 'WETH'])
+   * 
+   * @example
+   * ```typescript
+   * const tokens = await sdk.getWallet().getSupportedTokens();
+   * console.log('Supported tokens:', tokens); // ['FTD', 'USDC', 'WETH']
+   * ```
+   */
+  async getSupportedTokens(): Promise<string[]> {
+    return this.sdk.request('wallet:getSupportedTokens');
+  }
+
+  /**
+   * Execute a token swap
+   *
+   * @param sourceToken - Symbol of the token to swap from (e.g., 'USDC')
+   * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
+   * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
+   * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
+   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
+   * @returns Swap result with status and transaction details
+   * @throws {Error} If swap fails or tokens/networks are not supported
+   * 
+   * @example
+   * ```typescript
+   * const result = await sdk.getWallet().swap(
+   *   'USDC',
+   *   'WETH',
+   *   'base',
+   *   'ethereum',
+   *   '100.5'
+   * );
+   * console.log('Swap status:', result.status);
+   * ```
+   */
+  async swap(
+    sourceToken: string,
+    targetToken: string,
+    sourceNetwork: string,
+    targetNetwork: string,
+    amount: string
+  ): Promise<SwapResult> {
+    return this.sdk.request('wallet:swap', {
+      sourceToken,
+      targetToken,
+      sourceNetwork,
+      targetNetwork,
+      amount,
+    });
+  }
+
+  /**
+   * Get a quote for a token swap without executing it
+   * 
+   * Returns the expected output amount for a given swap.
+   * Useful for displaying swap previews to users before confirmation.
+   * 
+   * @param sourceToken - Symbol of the token to swap from (e.g., 'USDC')
+   * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
+   * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
+   * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
+   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
+   * @returns Quote with expected and minimum output amounts
+   * @throws {Error} If tokens/networks are not supported
+   * 
+   * @example
+   * ```typescript
+   * const quote = await sdk.getWallet().quoteSwap(
+   *   'USDC',
+   *   'WETH',
+   *   'base',
+   *   'ethereum',
+   *   '100.5'
+   * );
+   * console.log('Expected output:', quote.expectedAmountOut);
+   * console.log('Minimum output:', quote.minAmountOut);
+   * ```
+   */
+  async quoteSwap(
+    sourceToken: string,
+    targetToken: string,
+    sourceNetwork: string,
+    targetNetwork: string,
+    amount: string
+  ): Promise<SwapQuote> {
+    return this.sdk.request('wallet:quoteSwap', {
+      sourceToken,
+      targetToken,
+      sourceNetwork,
+      targetNetwork,
+      amount,
     });
   }
 }
