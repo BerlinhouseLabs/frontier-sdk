@@ -3,6 +3,7 @@ import { WalletAccess } from './access/wallet';
 import { StorageAccess } from './access/storage';
 import { ChainAccess } from './access/chain';
 import { UserAccess } from './access/user';
+import { PartnershipsAccess } from './access/partnerships';
 
 export class FrontierSDK {
   private requestId = 0;
@@ -11,12 +12,14 @@ export class FrontierSDK {
   private storage: StorageAccess;
   private chain: ChainAccess;
   private user: UserAccess;
+  private partnerships: PartnershipsAccess;
 
   constructor() {
     this.wallet = new WalletAccess(this);
     this.storage = new StorageAccess(this);
     this.chain = new ChainAccess(this);
     this.user = new UserAccess(this);
+    this.partnerships = new PartnershipsAccess(this);
     
     window.addEventListener('message', this.handleMessage);
     this.notifyReady();
@@ -89,6 +92,13 @@ export class FrontierSDK {
    */
   getUser(): UserAccess {
     return this.user;
+  }
+
+  /**
+   * Get partnerships access instance
+   */
+  getPartnerships(): PartnershipsAccess {
+    return this.partnerships;
   }
 
   /**

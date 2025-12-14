@@ -66,6 +66,17 @@ describe('FrontierSDK', () => {
       expect(typeof sdk.getStorage().remove).toBe('function');
       expect(typeof sdk.getStorage().clear).toBe('function');
     });
+
+    it('should create partnerships access instance', () => {
+      expect(sdk.getPartnerships()).toBeDefined();
+      expect(typeof sdk.getPartnerships().createSponsorPass).toBe('function');
+      expect(typeof sdk.getPartnerships().listActiveSponsorPasses).toBe('function');
+      expect(typeof sdk.getPartnerships().listAllSponsorPasses).toBe('function');
+      expect(typeof sdk.getPartnerships().listSponsors).toBe('function');
+      expect(typeof sdk.getPartnerships().getSponsor).toBe('function');
+      expect(typeof sdk.getPartnerships().getSponsorPass).toBe('function');
+      expect(typeof sdk.getPartnerships().revokeSponsorPass).toBe('function');
+    });
   });
 
   describe('Message Handling', () => {

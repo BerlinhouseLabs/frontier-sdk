@@ -69,6 +69,15 @@ Your app must declare required permissions in the Frontier app registry:
 - `user:getReferralDetails` - Access detailed referral information
 - `user:addUserContact` - Add user contact information
 
+### Partnerships Permissions
+- `partnerships:listSponsors` - List sponsors you manage (paginated)
+- `partnerships:getSponsor` - Retrieve a Sponsor by ID
+- `partnerships:createSponsorPass` - Create a SponsorPass
+- `partnerships:listActiveSponsorPasses` - List active SponsorPasses (paginated)
+- `partnerships:listAllSponsorPasses` - List all SponsorPasses (paginated)
+- `partnerships:getSponsorPass` - Retrieve a SponsorPass by ID
+- `partnerships:revokeSponsorPass` - Revoke a SponsorPass by ID
+
 ### Chain Permissions
 - `chain:getCurrentNetwork` - Get current network name
 - `chain:getAvailableNetworks` - Get list of available networks
