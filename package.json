@@ -47,8 +47,5 @@
     "type": "git",
     "url": "git+https://github.com/BerlinhouseLabs/frontier-sdk.git"
   },
-  "readme": "README.md",
-  "dependencies": {
-    "@frontiertower/frontier-sdk": "^0.3.0"
-  }
+  "readme": "README.md"
 }
