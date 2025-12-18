@@ -78,6 +78,23 @@ Your app must declare required permissions in the Frontier app registry:
 - `partnerships:getSponsorPass` - Retrieve a SponsorPass by ID
 - `partnerships:revokeSponsorPass` - Revoke a SponsorPass by ID
 
+### Third-Party Permissions
+- `thirdParty:listDevelopers` - List developer accounts (paginated)
+- `thirdParty:getDeveloper` - Get developer details by ID
+- `thirdParty:updateDeveloper` - Update developer information
+- `thirdParty:rotateDeveloperApiKey` - Rotate developer API key
+- `thirdParty:listApps` - List registered apps (paginated)
+- `thirdParty:createApp` - Register a new app
+- `thirdParty:getApp` - Get app details by ID
+- `thirdParty:updateApp` - Update an app
+- `thirdParty:deleteApp` - Request app deactivation
+- `thirdParty:listWebhooks` - List webhooks (paginated)
+- `thirdParty:createWebhook` - Create a new webhook
+- `thirdParty:getWebhook` - Get webhook details by ID
+- `thirdParty:updateWebhook` - Update a webhook
+- `thirdParty:deleteWebhook` - Delete a webhook
+- `thirdParty:rotateWebhookSigningKey` - Rotate webhook signing key
+
 ### Chain Permissions
 - `chain:getCurrentNetwork` - Get current network name
 - `chain:getAvailableNetworks` - Get list of available networks

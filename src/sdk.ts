@@ -4,6 +4,7 @@ import { StorageAccess } from './access/storage';
 import { ChainAccess } from './access/chain';
 import { UserAccess } from './access/user';
 import { PartnershipsAccess } from './access/partnerships';
+import { ThirdPartyAccess } from './access/third-party';
 
 export class FrontierSDK {
   private requestId = 0;
@@ -13,6 +14,7 @@ export class FrontierSDK {
   private chain: ChainAccess;
   private user: UserAccess;
   private partnerships: PartnershipsAccess;
+  private thirdParty: ThirdPartyAccess;
 
   constructor() {
     this.wallet = new WalletAccess(this);
@@ -20,6 +22,7 @@ export class FrontierSDK {
     this.chain = new ChainAccess(this);
     this.user = new UserAccess(this);
     this.partnerships = new PartnershipsAccess(this);
+    this.thirdParty = new ThirdPartyAccess(this);
     
     window.addEventListener('message', this.handleMessage);
     this.notifyReady();
@@ -99,6 +102,13 @@ export class FrontierSDK {
    */
   getPartnerships(): PartnershipsAccess {
     return this.partnerships;
+  }
+
+  /**
+   * Get third-party access instance
+   */
+  getThirdParty(): ThirdPartyAccess {
+    return this.thirdParty;
   }
 
   /**
