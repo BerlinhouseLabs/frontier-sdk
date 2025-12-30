@@ -66,7 +66,7 @@ export function renderStandaloneMessage(
             color: #4a5568;
             line-height: 1.8;
           ">
-            <li>Visit <a href="https://wallet.frontiertower.io" style="color: #667eea; text-decoration: underline; font-weight: 500;">wallet.frontiertower.io</a></li>
+            <li>Visit <a href="https://os.frontiertower.io" style="color: #667eea; text-decoration: underline; font-weight: 500;">os.frontiertower.io</a></li>
             <li>Go to the App Store</li>
             <li>Install this app</li>
           </ol>
@@ -78,7 +78,7 @@ export function renderStandaloneMessage(
           border-top: 1px solid #e2e8f0;
         ">
           <a 
-            href="https://wallet.frontiertower.io" 
+            href="https://os.frontiertower.io" 
             style="
               display: inline-block;
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -165,7 +165,7 @@ export function createStandaloneHTML(appName: string = 'Frontier App'): string {
             color: #4a5568;
             line-height: 1.8;
           ">
-            <li>Visit <a href="https://wallet.frontiertower.io" style="color: #667eea; text-decoration: underline; font-weight: 500;">wallet.frontiertower.io</a></li>
+            <li>Visit <a href="https://os.frontiertower.io" style="color: #667eea; text-decoration: underline; font-weight: 500;">os.frontiertower.io</a></li>
             <li>Go to the App Store</li>
             <li>Install this app</li>
           </ol>
@@ -177,7 +177,7 @@ export function createStandaloneHTML(appName: string = 'Frontier App'): string {
           border-top: 1px solid #e2e8f0;
         ">
           <a 
-            href="https://wallet.frontiertower.io" 
+            href="https://os.frontiertower.io" 
             style="
               display: inline-block;
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

@@ -106,10 +106,10 @@ Your app must declare required permissions in the Frontier app registry:
 The SDK verifies that apps are running in legitimate Frontier Wallet instances. Allowed origins:
 
 - `http://localhost:5173` (development)
-- `https://sandbox.wallet.frontiertower.io`
-- `https://alpha.wallet.frontiertower.io`
-- `https://beta.wallet.frontiertower.io`
-- `https://wallet.frontiertower.io` (production)
+- `https://sandbox.os.frontiertower.io`
+- `https://alpha.os.frontiertower.io`
+- `https://beta.os.frontiertower.io`
+- `https://os.frontiertower.io` (production)
 
 ## Development
 

@@ -85,7 +85,7 @@ describe('UI Utils - Detection', () => {
 
     it('should return origin from referrer', () => {
       Object.defineProperty(document, 'referrer', {
-        value: 'https://wallet.frontiertower.io/apps/test',
+        value: 'https://os.frontiertower.io/apps/test',
         writable: true,
         configurable: true,
       });
@@ -97,7 +97,7 @@ describe('UI Utils - Detection', () => {
         configurable: true,
       });
 
-      expect(getParentOrigin()).toBe('https://wallet.frontiertower.io');
+      expect(getParentOrigin()).toBe('https://os.frontiertower.io');
     });
 
     it('should return origin from parent.location when accessible', () => {
@@ -142,7 +142,7 @@ describe('UI Utils - Detection', () => {
 
     it('should extract origin correctly from referrer with path', () => {
       Object.defineProperty(document, 'referrer', {
-        value: 'https://sandbox.wallet.frontiertower.io/apps/kickstarter?param=value',
+        value: 'https://os.frontiertower.io/apps/kickstarter?param=value',
         writable: true,
         configurable: true,
       });
@@ -154,7 +154,7 @@ describe('UI Utils - Detection', () => {
         configurable: true,
       });
 
-      expect(getParentOrigin()).toBe('https://sandbox.wallet.frontiertower.io');
+      expect(getParentOrigin()).toBe('https://os.frontiertower.io');
     });
   });
 });

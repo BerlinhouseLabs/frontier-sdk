@@ -15,7 +15,7 @@ describe('UI Utils - Standalone', () => {
 
       expect(container.innerHTML).toContain('🚀 Frontier App');
       expect(container.innerHTML).toContain('Frontier Wallet Required');
-      expect(container.innerHTML).toContain('wallet.frontiertower.io');
+      expect(container.innerHTML).toContain('os.frontiertower.io');
     });
 
     it('should render standalone message with custom app name', () => {
@@ -37,7 +37,7 @@ describe('UI Utils - Standalone', () => {
     it('should include link to Frontier Wallet', () => {
       renderStandaloneMessage(container);
 
-      expect(container.innerHTML).toContain('href="https://wallet.frontiertower.io"');
+      expect(container.innerHTML).toContain('href="https://os.frontiertower.io"');
       expect(container.innerHTML).toContain('Open Frontier Wallet');
     });
 
@@ -80,7 +80,7 @@ describe('UI Utils - Standalone', () => {
 
       expect(html).toContain('🚀 Frontier App');
       expect(html).toContain('Frontier Wallet Required');
-      expect(html).toContain('wallet.frontiertower.io');
+      expect(html).toContain('os.frontiertower.io');
     });
 
     it('should return HTML string with custom app name', () => {
@@ -133,7 +133,7 @@ describe('UI Utils - Standalone', () => {
       // Should have link
       const link = container.querySelector('a');
       expect(link).toBeTruthy();
-      expect(link?.getAttribute('href')).toBe('https://wallet.frontiertower.io');
+      expect(link?.getAttribute('href')).toBe('https://os.frontiertower.io');
     });
 
     it('should match output of renderStandaloneMessage', () => {
