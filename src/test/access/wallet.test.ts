@@ -20,21 +20,30 @@ describe('WalletAccess', () => {
 
   describe('getBalance', () => {
     it('should call SDK request with wallet:getBalance type', async () => {
-      const mockBalance = 1000000000000000000n; // 1.0 with 18 decimals
+      const mockBalance = {
+        total: 1500000000000000000n,
+        ftd: 1000000000000000000n,
+        internalFtd: 500000000000000000n,
+      };
       mockRequest.mockResolvedValue(mockBalance);
 
       const result = await wallet.getBalance();
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:getBalance');
-      expect(result).toBe(mockBalance);
+      expect(result).toEqual(mockBalance);
     });
 
-    it('should handle zero balance', async () => {
-      mockRequest.mockResolvedValue(0n);
+    it('should handle zero balances', async () => {
+      const zeroBalance = {
+        total: 0n,
+        ftd: 0n,
+        internalFtd: 0n,
+      };
+      mockRequest.mockResolvedValue(zeroBalance);
 
       const result = await wallet.getBalance();
 
-      expect(result).toBe(0n);
+      expect(result).toEqual(zeroBalance);
     });
 
     it('should handle large balances', async () => {
@@ -55,20 +64,30 @@ describe('WalletAccess', () => {
 
   describe('getBalanceFormatted', () => {
     it('should call SDK request with wallet:getBalanceFormatted type', async () => {
-      mockRequest.mockResolvedValue('$10.50');
+      const mockFormatted = {
+        total: '$15.00',
+        ftd: '$10.00',
+        internalFtd: '$5.00',
+      };
+      mockRequest.mockResolvedValue(mockFormatted);
 
       const result = await wallet.getBalanceFormatted();
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:getBalanceFormatted');
-      expect(result).toBe('$10.50');
+      expect(result).toEqual(mockFormatted);
     });
 
     it('should handle zero balance formatted', async () => {
-      mockRequest.mockResolvedValue('$0.00');
+      const zeroFormatted = {
+        total: '$0.00',
+        ftd: '$0.00',
+        internalFtd: '$0.00',
+      };
+      mockRequest.mockResolvedValue(zeroFormatted);
 
       const result = await wallet.getBalanceFormatted();
 
-      expect(result).toBe('$0.00');
+      expect(result).toEqual(zeroFormatted);
     });
 
     it('should handle large formatted balances', async () => {
@@ -502,6 +521,52 @@ describe('WalletAccess', () => {
     });
   });
 
+  describe('transferInternalFrontierDollar', () => {
+    const toAddress = '0x2222222222222222222222222222222222222222';
+    const amount = '10.5';
+    
+    const mockReceipt: UserOperationReceipt = {
+      userOpHash: '0xhash',
+      transactionHash: '0xtxhash',
+      blockNumber: 12345n,
+      success: true,
+    };
+
+    it('should call SDK request with wallet:transferInternalFrontierDollar type', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+
+      const result = await wallet.transferInternalFrontierDollar(toAddress, amount);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferInternalFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides: undefined,
+      });
+      expect(result).toEqual(mockReceipt);
+    });
+
+    it('should support gas overrides', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+      const overrides: GasOverrides = {
+        maxFeePerGas: 1000000n,
+      };
+
+      await wallet.transferInternalFrontierDollar(toAddress, amount, overrides);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferInternalFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides,
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Insufficient internal balance'));
+
+      await expect(wallet.transferInternalFrontierDollar(toAddress, amount)).rejects.toThrow('Insufficient internal balance');
+    });
+  });
+
   describe('executeBatchCall', () => {
     const calls: ExecuteCall[] = [
       {
@@ -707,23 +772,38 @@ describe('WalletAccess', () => {
 
   describe('Integration', () => {
     it('should support sequential wallet operations', async () => {
+      const mockBalance = {
+        total: 1000000000000000000n,
+        ftd: 1000000000000000000n,
+        internalFtd: 0n,
+      };
       mockRequest
         .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
-        .mockResolvedValueOnce(1000000000000000000n);
+        .mockResolvedValueOnce(mockBalance);
 
       const address = await wallet.getAddress();
       const balance = await wallet.getBalance();
 
       expect(address).toBe('0x1234567890123456789012345678901234567890');
-      expect(balance).toBe(1000000000000000000n);
+      expect(balance).toEqual(mockBalance);
       expect(mockRequest).toHaveBeenCalledTimes(2);
     });
 
     it('should handle parallel wallet queries', async () => {
+      const mockBalance = {
+        total: 1000000000000000000n,
+        ftd: 1000000000000000000n,
+        internalFtd: 0n,
+      };
+      const mockFormatted = {
+        total: '$1.00',
+        ftd: '$1.00',
+        internalFtd: '$0.00',
+      };
       mockRequest
         .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
-        .mockResolvedValueOnce(1000000000000000000n)
-        .mockResolvedValueOnce('$1.00');
+        .mockResolvedValueOnce(mockBalance)
+        .mockResolvedValueOnce(mockFormatted);
 
       const [address, balance, formatted] = await Promise.all([
         wallet.getAddress(),
@@ -732,12 +812,17 @@ describe('WalletAccess', () => {
       ]);
 
       expect(address).toBe('0x1234567890123456789012345678901234567890');
-      expect(balance).toBe(1000000000000000000n);
-      expect(formatted).toBe('$1.00');
+      expect(balance).toEqual(mockBalance);
+      expect(formatted).toEqual(mockFormatted);
       expect(mockRequest).toHaveBeenCalledTimes(3);
     });
 
     it('should handle transaction workflow', async () => {
+      const mockBalance = {
+        total: 1000000000000000000n,
+        ftd: 1000000000000000000n,
+        internalFtd: 0n,
+      };
       const mockReceipt: UserOperationReceipt = {
         userOpHash: '0xhash',
         transactionHash: '0xtxhash',
@@ -746,11 +831,11 @@ describe('WalletAccess', () => {
       };
 
       mockRequest
-        .mockResolvedValueOnce(1000000000000000000n) // Check balance
+        .mockResolvedValueOnce(mockBalance) // Check balance
         .mockResolvedValueOnce(mockReceipt); // Execute transfer
 
       const balance = await wallet.getBalance();
-      expect(balance).toBeGreaterThan(0n);
+      expect(balance.total).toBeGreaterThan(0n);
 
       const receipt = await wallet.transferNative('0x2222222222222222222222222222222222222222', 100000000000000000n);
       expect(receipt.success).toBe(true);

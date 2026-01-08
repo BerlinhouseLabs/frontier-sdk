@@ -21,6 +21,30 @@ export interface SmartAccount {
 }
 
 /**
+ * Wallet balance breakdown
+ */
+export interface WalletBalance {
+  /** Total balance including both native and internal FTD */
+  total: bigint;
+  /** Native Frontier Dollar balance */
+  ftd: bigint;
+  /** Internal Frontier Dollar balance (for Network Society) */
+  internalFtd: bigint;
+}
+
+/**
+ * Formatted wallet balance breakdown
+ */
+export interface WalletBalanceFormatted {
+  /** Total balance formatted with currency symbol */
+  total: string;
+  /** Native Frontier Dollar balance formatted with currency symbol */
+  ftd: string;
+  /** Internal Frontier Dollar balance formatted with currency symbol */
+  internalFtd: string;
+}
+
+/**
  * Transaction receipt from a user operation
  */
 export interface UserOperationReceipt {
@@ -132,40 +156,41 @@ export class WalletAccess {
   constructor(private sdk: FrontierSDK) {}
 
   /**
-   * Get the current wallet balance
+   * Get the current wallet balance breakdown
    * 
-   * Returns the total USD stablecoin balance for the current network,
-   * normalized to 18 decimals for consistency.
+   * Returns the balance breakdown including total, native FTD,
+   * and internal FTD amounts.
    * 
-   * @returns Balance as bigint (18 decimals)
+   * @returns Balance breakdown object
    * @throws {Error} If no wallet exists
    * 
    * @example
    * ```typescript
    * const balance = await sdk.getWallet().getBalance();
-   * console.log('Balance:', balance.toString());
+   * console.log('Total Balance:', balance.total.toString());
+   * console.log('FTD Balance:', balance.ftd.toString());
    * ```
    */
-  async getBalance(): Promise<bigint> {
+  async getBalance(): Promise<WalletBalance> {
     return this.sdk.request('wallet:getBalance');
   }
 
   /**
    * Get the current wallet balance formatted for display
    * 
-   * Returns the total USD stablecoin balance as a formatted string
-   * with currency symbol (e.g., '$10.50').
+   * Returns the balance breakdown as formatted strings
+   * with currency symbol (e.g., { total: '$10.50', ... }).
    * 
-   * @returns Formatted balance string with $ sign
+   * @returns Formatted balance breakdown object
    * @throws {Error} If no wallet exists
    * 
    * @example
    * ```typescript
    * const balance = await sdk.getWallet().getBalanceFormatted();
-   * console.log('Balance:', balance); // '$10.50'
+   * console.log('Total:', balance.total); // '$10.50'
    * ```
    */
-  async getBalanceFormatted(): Promise<string> {
+  async getBalanceFormatted(): Promise<WalletBalanceFormatted> {
     return this.sdk.request('wallet:getBalanceFormatted');
   }
 
@@ -381,6 +406,38 @@ export class WalletAccess {
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferFrontierDollar', {
+      to,
+      amount,
+      overrides,
+    });
+  }
+
+  /**
+   * Transfer Internal Frontier Dollars to another address
+   * 
+   * Sends Internal Frontier Dollars (for Network Society spending) to a recipient address.
+   * Requires biometric authentication and sufficient balance.
+   * 
+   * @param to - Recipient address
+   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param overrides - Optional gas overrides
+   * @returns User operation receipt with transaction details
+   * @throws {Error} If insufficient balance or transaction fails
+   * 
+   * @example
+   * ```typescript
+   * const receipt = await sdk.getWallet().transferInternalFrontierDollar(
+   *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+   *   '10.5' // 10.5 Internal Frontier Dollars
+   * );
+   * ```
+   */
+  async transferInternalFrontierDollar(
+    to: string,
+    amount: string,
+    overrides?: GasOverrides
+  ): Promise<UserOperationReceipt> {
+    return this.sdk.request('wallet:transferInternalFrontierDollar', {
       to,
       amount,
       overrides,

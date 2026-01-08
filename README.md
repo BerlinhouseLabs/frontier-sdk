@@ -28,7 +28,14 @@ if (!isInFrontierApp()) {
 }
 
 // Access wallet information
+/**
+ * The wallet balance is split into two types:
+ * - Frontier Dollar (FTD): Freely convertible to fiat currency.
+ * - Internal Frontier Dollar: Only convertible by Frontier Tower representatives;
+ *   designed for circulation within the Network Society.
+ */
 const balance = await sdk.getWallet().getBalance();
+console.log('Total FTD:', balance.total.toString());
 const address = await sdk.getWallet().getAddress();
 
 // Use persistent storage
@@ -50,6 +57,7 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:approveERC20` - Approve ERC20 token spending
 - `wallet:transferNative` - Transfer native currency (ETH)
 - `wallet:transferFrontierDollar` - Transfer Frontier Dollars
+- `wallet:transferInternalFrontierDollar` - Transfer Internal Frontier Dollars
 - `wallet:executeCall` - Execute arbitrary contract calls
 - `wallet:executeBatchCall` - Execute multiple contract calls atomically
 - `wallet:getSupportedTokens` - Get list of supported tokens for swaps
