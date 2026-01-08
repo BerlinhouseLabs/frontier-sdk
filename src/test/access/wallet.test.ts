@@ -567,6 +567,52 @@ describe('WalletAccess', () => {
     });
   });
 
+  describe('transferOverallFrontierDollar', () => {
+    const toAddress = '0x2222222222222222222222222222222222222222';
+    const amount = '10.5';
+    
+    const mockReceipt: UserOperationReceipt = {
+      userOpHash: '0xhash',
+      transactionHash: '0xtxhash',
+      blockNumber: 12345n,
+      success: true,
+    };
+
+    it('should call SDK request with wallet:transferOverallFrontierDollar type', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+
+      const result = await wallet.transferOverallFrontierDollar(toAddress, amount);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferOverallFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides: undefined,
+      });
+      expect(result).toEqual(mockReceipt);
+    });
+
+    it('should support gas overrides', async () => {
+      mockRequest.mockResolvedValue(mockReceipt);
+      const overrides: GasOverrides = {
+        maxFeePerGas: 1000000n,
+      };
+
+      await wallet.transferOverallFrontierDollar(toAddress, amount, overrides);
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:transferOverallFrontierDollar', {
+        to: toAddress,
+        amount,
+        overrides,
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Insufficient total balance'));
+
+      await expect(wallet.transferOverallFrontierDollar(toAddress, amount)).rejects.toThrow('Insufficient total balance');
+    });
+  });
+
   describe('executeBatchCall', () => {
     const calls: ExecuteCall[] = [
       {

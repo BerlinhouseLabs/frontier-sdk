@@ -58,6 +58,7 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:transferNative` - Transfer native currency (ETH)
 - `wallet:transferFrontierDollar` - Transfer Frontier Dollars
 - `wallet:transferInternalFrontierDollar` - Transfer Internal Frontier Dollars
+- `wallet:transferOverallFrontierDollar` - Transfer Frontier Dollars with iFTD preferred
 - `wallet:executeCall` - Execute arbitrary contract calls
 - `wallet:executeBatchCall` - Execute multiple contract calls atomically
 - `wallet:getSupportedTokens` - Get list of supported tokens for swaps

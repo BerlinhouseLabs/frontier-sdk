@@ -445,6 +445,38 @@ export class WalletAccess {
   }
 
   /**
+   * Transfer Frontier Dollars with Internal Frontier Dollars (iFTD) preferred
+   * 
+   * This method will use Internal Frontier Dollars first, and if insufficient,
+   * it will use regular Frontier Dollars to complete the transfer.
+   * 
+   * @param to - Recipient address
+   * @param amount - Amount to send (as string, e.g., '10.5')
+   * @param overrides - Optional gas overrides
+   * @returns User operation receipt with transaction details
+   * @throws {Error} If insufficient total balance or transaction fails
+   * 
+   * @example
+   * ```typescript
+   * const receipt = await sdk.getWallet().transferOverallFrontierDollar(
+   *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+   *   '10.5'
+   * );
+   * ```
+   */
+  async transferOverallFrontierDollar(
+    to: string,
+    amount: string,
+    overrides?: GasOverrides
+  ): Promise<UserOperationReceipt> {
+    return this.sdk.request('wallet:transferOverallFrontierDollar', {
+      to,
+      amount,
+      overrides,
+    });
+  }
+
+  /**
    * Execute multiple calls atomically with a single signature
    * 
    * Executes multiple contract interactions in a single transaction.
