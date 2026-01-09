@@ -1,10 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ChainAccess, type ChainConfig } from '../../access/chain';
+import { ChainAccess, Underlying, type ChainConfig, type StableCoin, type Token } from '../../access/chain';
 import type { FrontierSDK } from '../../sdk';
 
 describe('ChainAccess', () => {
   let chainAccess: ChainAccess;
   let mockSDK: FrontierSDK;
+
+  const mockStableCoin: StableCoin = {
+    name: 'USD Coin',
+    symbol: 'USDC',
+    decimals: 6,
+    address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    underlying: Underlying.USD,
+  };
+
+  const mockToken: Token = {
+    name: 'Wrapped Ether',
+    symbol: 'WETH',
+    decimals: 18,
+    address: '0x4200000000000000000000000000000000000006',
+  };
 
   beforeEach(() => {
     mockSDK = {
@@ -85,16 +100,19 @@ describe('ChainAccess', () => {
         id: 84532,
         name: 'Base Sepolia',
         network: 'base-sepolia',
+        bridgeSwapRouterFactoryAddress: '0x1234567890123456789012345678901234567890',
+        uniswapV3FactoryAddress: '0x0987654321098765432109876543210987654321',
         nativeCurrency: {
           name: 'Sepolia Ether',
           symbol: 'ETH',
           decimals: 18,
         },
-        rpcUrl: 'https://sepolia.base.org',
         blockExplorer: {
           name: 'BaseScan',
           url: 'https://sepolia.basescan.org',
         },
+        stableCoins: [mockStableCoin],
+        supportedTokens: [mockToken],
         testnet: true,
       };
 
@@ -111,16 +129,19 @@ describe('ChainAccess', () => {
         id: 8453,
         name: 'Base',
         network: 'base',
+        bridgeSwapRouterFactoryAddress: '0x1234567890123456789012345678901234567890',
+        uniswapV3FactoryAddress: '0x0987654321098765432109876543210987654321',
         nativeCurrency: {
           name: 'Ether',
           symbol: 'ETH',
           decimals: 18,
         },
-        rpcUrl: 'https://mainnet.base.org',
         blockExplorer: {
           name: 'BaseScan',
           url: 'https://basescan.org',
         },
+        stableCoins: [mockStableCoin],
+        supportedTokens: [mockToken],
         testnet: false,
       };
 
@@ -131,11 +152,16 @@ describe('ChainAccess', () => {
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('name');
       expect(result).toHaveProperty('network');
+      expect(result).toHaveProperty('bridgeSwapRouterFactoryAddress');
+      expect(result).toHaveProperty('uniswapV3FactoryAddress');
       expect(result).toHaveProperty('nativeCurrency');
-      expect(result).toHaveProperty('rpcUrl');
       expect(result).toHaveProperty('blockExplorer');
+      expect(result).toHaveProperty('stableCoins');
+      expect(result).toHaveProperty('supportedTokens');
       expect(result).toHaveProperty('testnet');
       expect(result.testnet).toBe(false);
+      expect(result.stableCoins).toHaveLength(1);
+      expect(result.supportedTokens).toHaveLength(1);
     });
   });
 });

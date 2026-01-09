@@ -20,7 +20,11 @@ export { SwapResultStatus } from './access/wallet';
 // Export chain types
 export type {
   ChainConfig,
+  Token,
+  StableCoin,
 } from './access/chain';
+
+export { Underlying } from './access/chain';
 
 // Export user types
 export type {

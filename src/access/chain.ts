@@ -1,6 +1,35 @@
 import type { FrontierSDK } from '../sdk';
 
 /**
+ * Underlying currency type for stablecoins
+ */
+export enum Underlying {
+  USD = "USD",
+}
+
+/**
+ * Token information
+ */
+export interface Token {
+  /** Token name */
+  name: string;
+  /** Token symbol */
+  symbol: string;
+  /** Token decimals */
+  decimals: number;
+  /** Token contract address */
+  address: string;
+}
+
+/**
+ * Stablecoin information extending Token
+ */
+export interface StableCoin extends Token {
+  /** Underlying currency type */
+  underlying: Underlying;
+}
+
+/**
  * Chain configuration information
  */
 export interface ChainConfig {
@@ -10,19 +39,25 @@ export interface ChainConfig {
   name: string;
   /** Network identifier */
   network: string;
+  /** Bridge swap router factory address */
+  bridgeSwapRouterFactoryAddress: string;
+  /** Uniswap V3 factory address */
+  uniswapV3FactoryAddress: string;
   /** Native currency information */
   nativeCurrency: {
     name: string;
     symbol: string;
     decimals: number;
   };
-  /** RPC URL */
-  rpcUrl: string;
   /** Block explorer information */
   blockExplorer: {
     name: string;
     url: string;
   };
+  /** Supported stablecoins on this chain */
+  stableCoins: StableCoin[];
+  /** Supported tokens on this chain */
+  supportedTokens: Token[];
   /** Whether this is a testnet */
   testnet: boolean;
 }
