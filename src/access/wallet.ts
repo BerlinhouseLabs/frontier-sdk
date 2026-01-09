@@ -75,7 +75,7 @@ export interface GasOverrides {
  */
 export interface ExecuteCall {
   /** Target contract address */
-  to: string;
+  target: string;
   /** Value to send (in wei) */
   value?: bigint;
   /** Calldata */
@@ -359,7 +359,7 @@ export class WalletAccess {
    * import { encodeFunctionData } from 'viem';
    * 
    * const receipt = await sdk.getWallet().executeCall({
-   *   to: '0xContractAddress',
+   *   target: '0xContractAddress',
    *   value: 0n,
    *   data: encodeFunctionData({
    *     abi: contractABI,
@@ -493,12 +493,12 @@ export class WalletAccess {
    * 
    * const receipt = await sdk.getWallet().executeBatchCall([
    *   {
-   *     to: '0xToken1',
+   *     target: '0xToken1',
    *     value: 0n,
    *     data: encodeFunctionData({ abi: erc20Abi, functionName: 'approve', args: [...] })
    *   },
    *   {
-   *     to: '0xProtocol',
+   *     target: '0xProtocol',
    *     value: 0n,
    *     data: encodeFunctionData({ abi: protocolAbi, functionName: 'deposit', args: [...] })
    *   }

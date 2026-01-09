@@ -372,7 +372,7 @@ describe('WalletAccess', () => {
 
   describe('executeCall', () => {
     const call: ExecuteCall = {
-      to: '0x1111111111111111111111111111111111111111',
+      target: '0x1111111111111111111111111111111111111111',
       value: 0n,
       data: '0x1234',
     };
@@ -428,7 +428,7 @@ describe('WalletAccess', () => {
     it('should handle complex calldata', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
       const complexCall: ExecuteCall = {
-        to: '0x1111111111111111111111111111111111111111',
+        target: '0x1111111111111111111111111111111111111111',
         value: 0n,
         data: '0xa9059cbb0000000000000000000000002222222222222222222222222222222222222222000000000000000000000000000000000000000000000000000000000000000a',
       };
@@ -616,12 +616,12 @@ describe('WalletAccess', () => {
   describe('executeBatchCall', () => {
     const calls: ExecuteCall[] = [
       {
-        to: '0x1111111111111111111111111111111111111111',
+        target: '0x1111111111111111111111111111111111111111',
         value: 0n,
         data: '0x1234',
       },
       {
-        to: '0x2222222222222222222222222222222222222222',
+        target: '0x2222222222222222222222222222222222222222',
         value: 100n,
         data: '0x5678',
       },
