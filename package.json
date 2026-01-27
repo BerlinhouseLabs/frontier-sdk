@@ -1,6 +1,6 @@
 {
   "name": "@frontiertower/frontier-sdk",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "SDK for building apps on Frontier Wallet",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

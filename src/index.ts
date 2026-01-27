@@ -16,6 +16,11 @@ export type {
   UsdDepositInstructions,
   EurDepositInstructions,
   OnRampResponse,
+  LinkedBank,
+  LinkedBanksResponse,
+  LinkBankResponse,
+  BillingAddress,
+  AccountOwnerType,
 } from './access/wallet';
 
 export { SwapResultStatus } from './access/wallet';

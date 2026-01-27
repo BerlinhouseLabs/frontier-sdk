@@ -22,8 +22,8 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:getBalance type', async () => {
       const mockBalance = {
         total: 1500000000000000000n,
-        ftd: 1000000000000000000n,
-        internalFtd: 500000000000000000n,
+        fnd: 1000000000000000000n,
+        internalFnd: 500000000000000000n,
       };
       mockRequest.mockResolvedValue(mockBalance);
 
@@ -36,8 +36,8 @@ describe('WalletAccess', () => {
     it('should handle zero balances', async () => {
       const zeroBalance = {
         total: 0n,
-        ftd: 0n,
-        internalFtd: 0n,
+        fnd: 0n,
+        internalFnd: 0n,
       };
       mockRequest.mockResolvedValue(zeroBalance);
 
@@ -66,8 +66,8 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:getBalanceFormatted type', async () => {
       const mockFormatted = {
         total: '$15.00',
-        ftd: '$10.00',
-        internalFtd: '$5.00',
+        fnd: '$10.00',
+        internalFnd: '$5.00',
       };
       mockRequest.mockResolvedValue(mockFormatted);
 
@@ -80,8 +80,8 @@ describe('WalletAccess', () => {
     it('should handle zero balance formatted', async () => {
       const zeroFormatted = {
         total: '$0.00',
-        ftd: '$0.00',
-        internalFtd: '$0.00',
+        fnd: '$0.00',
+        internalFnd: '$0.00',
       };
       mockRequest.mockResolvedValue(zeroFormatted);
 
@@ -680,7 +680,7 @@ describe('WalletAccess', () => {
 
   describe('getSupportedTokens', () => {
     it('should call SDK request with wallet:getSupportedTokens type', async () => {
-      const mockTokens = ['FTD', 'USDC', 'WETH'];
+      const mockTokens = ['FND', 'USDC', 'WETH'];
       mockRequest.mockResolvedValue(mockTokens);
 
       const result = await wallet.getSupportedTokens();
@@ -735,7 +735,7 @@ describe('WalletAccess', () => {
       };
       mockRequest.mockResolvedValue(submittedResult);
 
-      const result = await wallet.swap('USDC', 'FTD', 'base', 'ethereum', '50');
+      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', '50');
 
       expect(result.status).toBe(SwapResultStatus.SUBMITTED);
     });
@@ -820,8 +820,8 @@ describe('WalletAccess', () => {
     it('should support sequential wallet operations', async () => {
       const mockBalance = {
         total: 1000000000000000000n,
-        ftd: 1000000000000000000n,
-        internalFtd: 0n,
+        fnd: 1000000000000000000n,
+        internalFnd: 0n,
       };
       mockRequest
         .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
@@ -838,13 +838,13 @@ describe('WalletAccess', () => {
     it('should handle parallel wallet queries', async () => {
       const mockBalance = {
         total: 1000000000000000000n,
-        ftd: 1000000000000000000n,
-        internalFtd: 0n,
+        fnd: 1000000000000000000n,
+        internalFnd: 0n,
       };
       const mockFormatted = {
         total: '$1.00',
-        ftd: '$1.00',
-        internalFtd: '$0.00',
+        fnd: '$1.00',
+        internalFnd: '$0.00',
       };
       mockRequest
         .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
@@ -866,8 +866,8 @@ describe('WalletAccess', () => {
     it('should handle transaction workflow', async () => {
       const mockBalance = {
         total: 1000000000000000000n,
-        ftd: 1000000000000000000n,
-        internalFtd: 0n,
+        fnd: 1000000000000000000n,
+        internalFnd: 0n,
       };
       const mockReceipt: UserOperationReceipt = {
         userOpHash: '0xhash',
@@ -1011,6 +1011,290 @@ describe('WalletAccess', () => {
       mockRequest.mockRejectedValue(new Error('KYC not approved'));
 
       await expect(wallet.getEurDepositInstructions()).rejects.toThrow('KYC not approved');
+    });
+  });
+
+  describe('getLinkedBanks', () => {
+    const mockLinkedBanksResponse = {
+      banks: [
+        {
+          id: 'ea_abc123',
+          bankName: 'Chase',
+          last4: '1111',
+          withdrawalAddress: '0x1234567890abcdef',
+          chain: 'base',
+        },
+        {
+          id: 'ea_def456',
+          bankName: 'Deutsche Bank',
+          last4: '3000',
+          withdrawalAddress: '0xabcdef1234567890',
+          chain: 'base',
+        },
+      ],
+    };
+
+    it('should call SDK request with wallet:getLinkedBanks type', async () => {
+      mockRequest.mockResolvedValue(mockLinkedBanksResponse);
+
+      const result = await wallet.getLinkedBanks();
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:getLinkedBanks');
+      expect(result).toEqual(mockLinkedBanksResponse);
+    });
+
+    it('should return empty array when no banks linked', async () => {
+      mockRequest.mockResolvedValue({ banks: [] });
+
+      const result = await wallet.getLinkedBanks();
+
+      expect(result.banks).toEqual([]);
+    });
+
+    it('should return bank details with all fields', async () => {
+      mockRequest.mockResolvedValue(mockLinkedBanksResponse);
+
+      const result = await wallet.getLinkedBanks();
+
+      expect(result.banks[0].id).toBe('ea_abc123');
+      expect(result.banks[0].bankName).toBe('Chase');
+      expect(result.banks[0].last4).toBe('1111');
+      expect(result.banks[0].withdrawalAddress).toBe('0x1234567890abcdef');
+      expect(result.banks[0].chain).toBe('base');
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('KYC not approved'));
+
+      await expect(wallet.getLinkedBanks()).rejects.toThrow('KYC not approved');
+    });
+  });
+
+  describe('linkUsBankAccount', () => {
+    const mockLinkResponse = {
+      externalAccountId: 'ea_abc123',
+      bankName: 'Chase',
+      withdrawalAddress: '0x1234567890abcdef',
+      chain: 'base',
+    };
+
+    const mockAddress = {
+      streetLine1: '123 Main St',
+      city: 'San Francisco',
+      state: 'CA',
+      postalCode: '94102',
+      country: 'USA',
+    };
+
+    it('should call SDK request with wallet:linkUsBankAccount type', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      const result = await wallet.linkUsBankAccount(
+        'John Doe',
+        'Chase',
+        '121000248',
+        '1210002481111',
+        'checking',
+        mockAddress
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkUsBankAccount', {
+        accountOwnerName: 'John Doe',
+        bankName: 'Chase',
+        routingNumber: '121000248',
+        accountNumber: '1210002481111',
+        checkingOrSavings: 'checking',
+        address: mockAddress,
+      });
+      expect(result).toEqual(mockLinkResponse);
+    });
+
+    it('should support savings account type', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      await wallet.linkUsBankAccount(
+        'John Doe',
+        'Chase',
+        '121000248',
+        '1210002481111',
+        'savings',
+        mockAddress
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkUsBankAccount', {
+        accountOwnerName: 'John Doe',
+        bankName: 'Chase',
+        routingNumber: '121000248',
+        accountNumber: '1210002481111',
+        checkingOrSavings: 'savings',
+        address: mockAddress,
+      });
+    });
+
+    it('should handle address with streetLine2', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+      const addressWithLine2 = {
+        ...mockAddress,
+        streetLine2: 'Apt 4B',
+      };
+
+      await wallet.linkUsBankAccount(
+        'John Doe',
+        'Chase',
+        '121000248',
+        '1210002481111',
+        'checking',
+        addressWithLine2
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkUsBankAccount', {
+        accountOwnerName: 'John Doe',
+        bankName: 'Chase',
+        routingNumber: '121000248',
+        accountNumber: '1210002481111',
+        checkingOrSavings: 'checking',
+        address: addressWithLine2,
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Invalid routing number'));
+
+      await expect(
+        wallet.linkUsBankAccount('John Doe', 'Chase', '000000000', '1111', 'checking', mockAddress)
+      ).rejects.toThrow('Invalid routing number');
+    });
+  });
+
+  describe('linkEuroAccount', () => {
+    const mockLinkResponse = {
+      externalAccountId: 'ea_xyz789',
+      bankName: 'Deutsche Bank',
+      withdrawalAddress: '0xabcdef1234567890',
+      chain: 'base',
+    };
+
+    it('should call SDK request with wallet:linkEuroAccount type', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      const result = await wallet.linkEuroAccount(
+        'Hans Mueller',
+        'individual',
+        'Hans',
+        'Mueller',
+        'DE89370400440532013000',
+        'COBADEFFXXX'
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkEuroAccount', {
+        accountOwnerName: 'Hans Mueller',
+        accountOwnerType: 'individual',
+        firstName: 'Hans',
+        lastName: 'Mueller',
+        ibanAccountNumber: 'DE89370400440532013000',
+        bic: 'COBADEFFXXX',
+      });
+      expect(result).toEqual(mockLinkResponse);
+    });
+
+    it('should link EUR account without BIC', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      await wallet.linkEuroAccount(
+        'Hans Mueller',
+        'individual',
+        'Hans',
+        'Mueller',
+        'DE89370400440532013000'
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkEuroAccount', {
+        accountOwnerName: 'Hans Mueller',
+        accountOwnerType: 'individual',
+        firstName: 'Hans',
+        lastName: 'Mueller',
+        ibanAccountNumber: 'DE89370400440532013000',
+        bic: undefined,
+      });
+    });
+
+    it('should support business account type', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      await wallet.linkEuroAccount(
+        'Acme GmbH',
+        'business',
+        'Acme',
+        'GmbH',
+        'DE89370400440532013000'
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkEuroAccount', {
+        accountOwnerName: 'Acme GmbH',
+        accountOwnerType: 'business',
+        firstName: 'Acme',
+        lastName: 'GmbH',
+        ibanAccountNumber: 'DE89370400440532013000',
+        bic: undefined,
+      });
+    });
+
+    it('should handle different IBAN formats with BIC', async () => {
+      mockRequest.mockResolvedValue(mockLinkResponse);
+
+      await wallet.linkEuroAccount(
+        'Jean Dupont',
+        'individual',
+        'Jean',
+        'Dupont',
+        'FR7630006000011234567890189',
+        'BNPAFRPP'
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:linkEuroAccount', {
+        accountOwnerName: 'Jean Dupont',
+        accountOwnerType: 'individual',
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        ibanAccountNumber: 'FR7630006000011234567890189',
+        bic: 'BNPAFRPP',
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Invalid IBAN'));
+
+      await expect(
+        wallet.linkEuroAccount('Hans Mueller', 'individual', 'Hans', 'Mueller', 'INVALID')
+      ).rejects.toThrow('Invalid IBAN');
+    });
+  });
+
+  describe('deleteLinkedBank', () => {
+    it('should call SDK request with correct method and bank ID', async () => {
+      mockRequest.mockResolvedValue(undefined);
+
+      await wallet.deleteLinkedBank('bank_abc123');
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:deleteLinkedBank', {
+        bankId: 'bank_abc123',
+      });
+    });
+
+    it('should handle different bank ID formats', async () => {
+      mockRequest.mockResolvedValue(undefined);
+
+      await wallet.deleteLinkedBank('ea_def456');
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:deleteLinkedBank', {
+        bankId: 'ea_def456',
+      });
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('Bank not found'));
+
+      await expect(wallet.deleteLinkedBank('invalid_id')).rejects.toThrow('Bank not found');
     });
   });
 });

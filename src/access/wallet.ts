@@ -24,12 +24,12 @@ export interface SmartAccount {
  * Wallet balance breakdown
  */
 export interface WalletBalance {
-  /** Total balance including both native and internal FTD */
+  /** Total balance including both native and internal FND */
   total: bigint;
-  /** Native Frontier Dollar balance */
-  ftd: bigint;
-  /** Internal Frontier Dollar balance (for Network Society) */
-  internalFtd: bigint;
+  /** Native Frontier Network Dollar balance */
+  fnd: bigint;
+  /** Internal Frontier Network Dollar balance (for Network Society) */
+  internalFnd: bigint;
 }
 
 /**
@@ -38,10 +38,10 @@ export interface WalletBalance {
 export interface WalletBalanceFormatted {
   /** Total balance formatted with currency symbol */
   total: string;
-  /** Native Frontier Dollar balance formatted with currency symbol */
-  ftd: string;
-  /** Internal Frontier Dollar balance formatted with currency symbol */
-  internalFtd: string;
+  /** Native Frontier Network Dollar balance formatted with currency symbol */
+  fnd: string;
+  /** Internal Frontier Network Dollar balance formatted with currency symbol */
+  internalFnd: string;
 }
 
 /**
@@ -189,6 +189,67 @@ export interface OnRampResponse<T = UsdDepositInstructions | EurDepositInstructi
 }
 
 /**
+ * Linked bank account for withdrawals (off-ramp)
+ */
+export interface LinkedBank {
+  /** External account ID */
+  id: string;
+  /** Bank name */
+  bankName: string;
+  /** Last 4 digits of account number */
+  last4: string;
+  /** Withdrawal address for this bank */
+  withdrawalAddress: string;
+  /** Chain for withdrawals */
+  chain: string;
+}
+
+/**
+ * Response containing linked bank accounts
+ */
+export interface LinkedBanksResponse {
+  /** List of linked bank accounts */
+  banks: LinkedBank[];
+}
+
+/**
+ * Response from linking a bank account
+ */
+export interface LinkBankResponse {
+  /** External account ID */
+  externalAccountId: string;
+  /** Bank name */
+  bankName: string;
+  /** Withdrawal address for this bank */
+  withdrawalAddress: string;
+  /** Chain for withdrawals */
+  chain: string;
+}
+
+/**
+ * Billing address for bank account linking
+ */
+export interface BillingAddress {
+  /** Street address line 1 */
+  streetLine1: string;
+  /** Street address line 2 (optional) */
+  streetLine2?: string;
+  /** City */
+  city: string;
+  /** State/Province */
+  state: string;
+  /** Postal/ZIP code */
+  postalCode: string;
+  /** Country code (e.g., 'USA') */
+  country: string;
+}
+
+/**
+ * Account owner type for IBAN accounts
+ */
+export type AccountOwnerType = 'individual' | 'business';
+
+/**
  * Wallet access class for interacting with the user's wallet
  * 
  * This class provides methods to:
@@ -206,8 +267,8 @@ export class WalletAccess {
   /**
    * Get the current wallet balance breakdown
    * 
-   * Returns the balance breakdown including total, native FTD,
-   * and internal FTD amounts.
+   * Returns the balance breakdown including total, native FND,
+   * and internal FND amounts.
    * 
    * @returns Balance breakdown object
    * @throws {Error} If no wallet exists
@@ -216,7 +277,7 @@ export class WalletAccess {
    * ```typescript
    * const balance = await sdk.getWallet().getBalance();
    * console.log('Total Balance:', balance.total.toString());
-   * console.log('FTD Balance:', balance.ftd.toString());
+   * console.log('FND Balance:', balance.fnd.toString());
    * ```
    */
   async getBalance(): Promise<WalletBalance> {
@@ -493,7 +554,7 @@ export class WalletAccess {
   }
 
   /**
-   * Transfer Frontier Dollars with Internal Frontier Dollars (iFTD) preferred
+   * Transfer Frontier Dollars with Internal Frontier Network Dollars (iFND) preferred
    * 
    * This method will use Internal Frontier Dollars first, and if insufficient,
    * it will use regular Frontier Dollars to complete the transfer.
@@ -569,12 +630,12 @@ export class WalletAccess {
    * Returns an array of token symbols that are supported for swaps
    * and other operations on the current network.
    * 
-   * @returns Array of token symbols (e.g., ['FTD', 'USDC', 'WETH'])
+   * @returns Array of token symbols (e.g., ['FND', 'USDC', 'WETH'])
    * 
    * @example
    * ```typescript
    * const tokens = await sdk.getWallet().getSupportedTokens();
-   * console.log('Supported tokens:', tokens); // ['FTD', 'USDC', 'WETH']
+   * console.log('Supported tokens:', tokens); // ['FND', 'USDC', 'WETH']
    * ```
    */
   async getSupportedTokens(): Promise<string[]> {
@@ -711,5 +772,148 @@ export class WalletAccess {
    */
   async getEurDepositInstructions(): Promise<OnRampResponse<EurDepositInstructions>> {
     return this.sdk.request('wallet:getEurDepositInstructions');
+  }
+
+  /**
+   * Get all linked bank accounts for withdrawals (off-ramp)
+   * 
+   * Returns a list of bank accounts that have been linked for
+   * withdrawing stablecoins to fiat.
+   * 
+   * Requires approved KYC verification.
+   * 
+   * @returns List of linked bank accounts with withdrawal addresses
+   * @throws {Error} If KYC is not approved
+   * 
+   * @example
+   * ```typescript
+   * const { banks } = await sdk.getWallet().getLinkedBanks();
+   * banks.forEach(bank => {
+   *   console.log(`${bank.bankName} (****${bank.last4})`);
+   * });
+   * ```
+   */
+  async getLinkedBanks(): Promise<LinkedBanksResponse> {
+    return this.sdk.request('wallet:getLinkedBanks');
+  }
+
+  /**
+   * Link a US bank account for withdrawals (off-ramp)
+   * 
+   * Links a US bank account (checking or savings) for withdrawing
+   * stablecoins to USD via ACH transfer.
+   * 
+   * Requires approved KYC verification.
+   * 
+   * @param accountOwnerName - Full name of the account owner
+   * @param bankName - Name of the bank (e.g., 'Chase', 'Bank of America')
+   * @param routingNumber - Bank routing number (9 digits)
+   * @param accountNumber - Bank account number
+   * @param checkingOrSavings - Account type: 'checking' or 'savings'
+   * @param address - Billing address for the account
+   * @returns Linked bank details with withdrawal address
+   * @throws {Error} If KYC is not approved or bank details are invalid
+   * 
+   * @example
+   * ```typescript
+   * const result = await sdk.getWallet().linkUsBankAccount(
+   *   'John Doe',
+   *   'Chase',
+   *   '121000248',
+   *   '1234567890',
+   *   'checking',
+   *   {
+   *     streetLine1: '123 Main St',
+   *     city: 'San Francisco',
+   *     state: 'CA',
+   *     postalCode: '94102',
+   *     country: 'USA'
+   *   }
+   * );
+   * console.log('Linked bank:', result.bankName);
+   * ```
+   */
+  async linkUsBankAccount(
+    accountOwnerName: string,
+    bankName: string,
+    routingNumber: string,
+    accountNumber: string,
+    checkingOrSavings: 'checking' | 'savings',
+    address: BillingAddress
+  ): Promise<LinkBankResponse> {
+    return this.sdk.request('wallet:linkUsBankAccount', {
+      accountOwnerName,
+      bankName,
+      routingNumber,
+      accountNumber,
+      checkingOrSavings,
+      address,
+    });
+  }
+
+  /**
+   * Link a EUR/IBAN bank account for withdrawals (off-ramp)
+   * 
+   * Links a European bank account via IBAN for withdrawing
+   * stablecoins to EUR via SEPA transfer.
+   * 
+   * Requires approved KYC verification.
+   * 
+   * @param accountOwnerName - Full name of the account owner
+   * @param accountOwnerType - Type of account owner: 'individual' or 'business'
+   * @param firstName - First name of the account owner
+   * @param lastName - Last name of the account owner
+   * @param ibanAccountNumber - IBAN account number
+   * @param bic - Optional BIC/SWIFT code
+   * @returns Linked bank details with withdrawal address
+   * @throws {Error} If KYC is not approved or bank details are invalid
+   * 
+   * @example
+   * ```typescript
+   * const result = await sdk.getWallet().linkEuroAccount(
+   *   'Hans Mueller',
+   *   'individual',
+   *   'Hans',
+   *   'Mueller',
+   *   'DE89370400440532013000',
+   *   'COBADEFFXXX' // optional BIC
+   * );
+   * console.log('Linked bank:', result.bankName);
+   * ```
+   */
+  async linkEuroAccount(
+    accountOwnerName: string,
+    accountOwnerType: AccountOwnerType,
+    firstName: string,
+    lastName: string,
+    ibanAccountNumber: string,
+    bic?: string
+  ): Promise<LinkBankResponse> {
+    return this.sdk.request('wallet:linkEuroAccount', {
+      accountOwnerName,
+      accountOwnerType,
+      firstName,
+      lastName,
+      ibanAccountNumber,
+      bic,
+    });
+  }
+
+  /**
+   * Delete a linked bank account
+   * 
+   * Removes a previously linked bank account from the user's off-ramp options.
+   * 
+   * @param bankId - The ID of the linked bank account to delete
+   * @throws {Error} If the bank account doesn't exist or deletion fails
+   * 
+   * @example
+   * ```typescript
+   * await sdk.getWallet().deleteLinkedBank('bank_abc123');
+   * console.log('Bank account deleted');
+   * ```
+   */
+  async deleteLinkedBank(bankId: string): Promise<void> {
+    return this.sdk.request('wallet:deleteLinkedBank', { bankId });
   }
 }

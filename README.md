@@ -30,12 +30,12 @@ if (!isInFrontierApp()) {
 // Access wallet information
 /**
  * The wallet balance is split into two types:
- * - Frontier Dollar (FTD): Freely convertible to fiat currency.
- * - Internal Frontier Dollar: Only convertible by Frontier Tower representatives;
+ * - Frontier Network Dollar (FND): Freely convertible to fiat currency.
+ * - Internal Frontier Network Dollar (iFND): Only convertible by Frontier Tower representatives;
  *   designed for circulation within the Network Society.
  */
 const balance = await sdk.getWallet().getBalance();
-console.log('Total FTD:', balance.total.toString());
+console.log('Total FND:', balance.total.toString());
 const address = await sdk.getWallet().getAddress();
 
 // Use persistent storage
@@ -58,7 +58,7 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:transferNative` - Transfer native currency (ETH)
 - `wallet:transferFrontierDollar` - Transfer Frontier Dollars
 - `wallet:transferInternalFrontierDollar` - Transfer Internal Frontier Dollars
-- `wallet:transferOverallFrontierDollar` - Transfer Frontier Dollars with iFTD preferred
+- `wallet:transferOverallFrontierDollar` - Transfer Frontier Dollars with iFND preferred
 - `wallet:executeCall` - Execute arbitrary contract calls
 - `wallet:executeBatchCall` - Execute multiple contract calls atomically
 - `wallet:getSupportedTokens` - Get list of supported tokens for swaps
@@ -66,6 +66,10 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:quoteSwap` - Get quotes for token swaps
 - `wallet:getUsdDepositInstructions` - Get USD bank deposit instructions for fiat on-ramp
 - `wallet:getEurDepositInstructions` - Get EUR (SEPA) deposit instructions for fiat on-ramp
+- `wallet:getLinkedBanks` - Get linked bank accounts for withdrawals (off-ramp)
+- `wallet:linkUsBankAccount` - Link a US bank account for USD withdrawals
+- `wallet:linkEuroAccount` - Link a EUR/IBAN bank account for EUR withdrawals
+- `wallet:deleteLinkedBank` - Delete a linked bank account
 
 ### Storage Permissions
 - `storage:get` - Read from storage
