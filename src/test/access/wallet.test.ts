@@ -893,4 +893,124 @@ describe('WalletAccess', () => {
       await expect(wallet.getBalance()).rejects.toThrow('Permission denied');
     });
   });
+
+  describe('getUsdDepositInstructions', () => {
+    const mockUsdResponse = {
+      currency: 'usd' as const,
+      depositInstructions: {
+        currency: 'usd' as const,
+        bankName: 'Test Bank',
+        bankAddress: '123 Bank St, New York, NY',
+        bankRoutingNumber: '123456789',
+        bankAccountNumber: '987654321',
+        bankBeneficiaryName: 'Frontier User',
+        paymentRail: 'ach',
+      },
+      destinationAddress: '0x1234567890123456789012345678901234567890',
+    };
+
+    it('should call SDK request with wallet:getUsdDepositInstructions type', async () => {
+      mockRequest.mockResolvedValue(mockUsdResponse);
+
+      const result = await wallet.getUsdDepositInstructions();
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:getUsdDepositInstructions');
+      expect(result).toEqual(mockUsdResponse);
+    });
+
+    it('should return USD deposit instructions with all fields', async () => {
+      mockRequest.mockResolvedValue(mockUsdResponse);
+
+      const result = await wallet.getUsdDepositInstructions();
+
+      expect(result.currency).toBe('usd');
+      expect(result.depositInstructions.bankName).toBe('Test Bank');
+      expect(result.depositInstructions.bankRoutingNumber).toBe('123456789');
+      expect(result.depositInstructions.bankAccountNumber).toBe('987654321');
+      expect(result.depositInstructions.bankBeneficiaryName).toBe('Frontier User');
+      expect(result.depositInstructions.paymentRail).toBe('ach');
+      expect(result.destinationAddress).toBe('0x1234567890123456789012345678901234567890');
+    });
+
+    it('should handle wire payment rail', async () => {
+      const wireResponse = {
+        ...mockUsdResponse,
+        depositInstructions: {
+          ...mockUsdResponse.depositInstructions,
+          paymentRail: 'wire',
+        },
+      };
+      mockRequest.mockResolvedValue(wireResponse);
+
+      const result = await wallet.getUsdDepositInstructions();
+
+      expect(result.depositInstructions.paymentRail).toBe('wire');
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('KYC not approved'));
+
+      await expect(wallet.getUsdDepositInstructions()).rejects.toThrow('KYC not approved');
+    });
+  });
+
+  describe('getEurDepositInstructions', () => {
+    const mockEurResponse = {
+      currency: 'eur' as const,
+      depositInstructions: {
+        currency: 'eur' as const,
+        iban: 'DE89370400440532013000',
+        bic: 'COBADEFFXXX',
+        bankName: 'Commerzbank',
+        beneficiaryName: 'Frontier User',
+      },
+      destinationAddress: '0x1234567890123456789012345678901234567890',
+    };
+
+    it('should call SDK request with wallet:getEurDepositInstructions type', async () => {
+      mockRequest.mockResolvedValue(mockEurResponse);
+
+      const result = await wallet.getEurDepositInstructions();
+
+      expect(mockRequest).toHaveBeenCalledWith('wallet:getEurDepositInstructions');
+      expect(result).toEqual(mockEurResponse);
+    });
+
+    it('should return EUR deposit instructions with all fields', async () => {
+      mockRequest.mockResolvedValue(mockEurResponse);
+
+      const result = await wallet.getEurDepositInstructions();
+
+      expect(result.currency).toBe('eur');
+      expect(result.depositInstructions.iban).toBe('DE89370400440532013000');
+      expect(result.depositInstructions.bic).toBe('COBADEFFXXX');
+      expect(result.depositInstructions.bankName).toBe('Commerzbank');
+      expect(result.depositInstructions.beneficiaryName).toBe('Frontier User');
+      expect(result.destinationAddress).toBe('0x1234567890123456789012345678901234567890');
+    });
+
+    it('should handle different IBAN formats', async () => {
+      const frenchResponse = {
+        ...mockEurResponse,
+        depositInstructions: {
+          ...mockEurResponse.depositInstructions,
+          iban: 'FR7630006000011234567890189',
+          bic: 'BNPAFRPP',
+          bankName: 'BNP Paribas',
+        },
+      };
+      mockRequest.mockResolvedValue(frenchResponse);
+
+      const result = await wallet.getEurDepositInstructions();
+
+      expect(result.depositInstructions.iban).toBe('FR7630006000011234567890189');
+      expect(result.depositInstructions.bic).toBe('BNPAFRPP');
+    });
+
+    it('should propagate errors from SDK', async () => {
+      mockRequest.mockRejectedValue(new Error('KYC not approved'));
+
+      await expect(wallet.getEurDepositInstructions()).rejects.toThrow('KYC not approved');
+    });
+  });
 });

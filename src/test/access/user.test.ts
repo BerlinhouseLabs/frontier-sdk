@@ -6,7 +6,8 @@ import {
   type ReferralOverview,
   type ReferralDetails,
   type UserContactPayload,
-  type PaginatedResponse
+  type PaginatedResponse,
+  type KycStatusResponse
 } from '../../access/user';
 import type { FrontierSDK } from '../../sdk';
 
@@ -355,6 +356,114 @@ describe('UserAccess', () => {
       vi.mocked(mockSDK.request).mockRejectedValue(new Error('Invalid email format'));
 
       await expect(userAccess.addUserContact(contactData)).rejects.toThrow('Invalid email format');
+    });
+  });
+
+  describe('getOrCreateKyc', () => {
+    it('should request KYC status without redirectUri', async () => {
+      const mockKycResponse: KycStatusResponse = {
+        status: 'not_started',
+        isApproved: false,
+        rejectionReason: null,
+        kycLinkId: 'kyc_new123',
+        kycLinkUrl: 'https://verify.bridge.xyz/new123',
+        tosStatus: 'pending',
+        tosLink: 'https://bridge.xyz/tos/new123',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockKycResponse);
+
+      const result = await userAccess.getOrCreateKyc();
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getOrCreateKyc', undefined);
+      expect(result).toEqual(mockKycResponse);
+      expect(result.tosStatus).toBe('pending');
+      expect(result.tosLink).toBe('https://bridge.xyz/tos/new123');
+    });
+
+    it('should request KYC status with redirectUri', async () => {
+      const mockKycResponse: KycStatusResponse = {
+        status: 'not_started',
+        isApproved: false,
+        rejectionReason: null,
+        kycLinkId: 'kyc_new456',
+        kycLinkUrl: 'https://verify.bridge.xyz/new456',
+        tosStatus: 'pending',
+        tosLink: 'https://bridge.xyz/tos/new456',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockKycResponse);
+
+      const redirectUri = 'https://myapp.com/callback';
+      const result = await userAccess.getOrCreateKyc(redirectUri);
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getOrCreateKyc', redirectUri);
+      expect(result.kycLinkUrl).toBe('https://verify.bridge.xyz/new456');
+    });
+
+    it('should return approved status when KYC already completed', async () => {
+      const mockKycResponse: KycStatusResponse = {
+        status: 'approved',
+        isApproved: true,
+        rejectionReason: null,
+        kycLinkId: 'kyc_existing123',
+        kycLinkUrl: null,
+        tosStatus: 'approved',
+        tosLink: null,
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockKycResponse);
+
+      const result = await userAccess.getOrCreateKyc();
+
+      expect(result.status).toBe('approved');
+      expect(result.isApproved).toBe(true);
+      expect(result.kycLinkUrl).toBeNull();
+      expect(result.tosStatus).toBe('approved');
+    });
+
+    it('should return in_review status', async () => {
+      const mockKycResponse: KycStatusResponse = {
+        status: 'in_review',
+        isApproved: false,
+        rejectionReason: null,
+        kycLinkId: 'kyc_pending123',
+        kycLinkUrl: 'https://verify.bridge.xyz/pending123',
+        tosStatus: 'approved',
+        tosLink: null,
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockKycResponse);
+
+      const result = await userAccess.getOrCreateKyc();
+
+      expect(result.status).toBe('in_review');
+      expect(result.isApproved).toBe(false);
+    });
+
+    it('should return rejected status with reason', async () => {
+      const mockKycResponse: KycStatusResponse = {
+        status: 'rejected',
+        isApproved: false,
+        rejectionReason: 'Document verification failed',
+        kycLinkId: 'kyc_rejected123',
+        kycLinkUrl: null,
+        tosStatus: 'approved',
+        tosLink: null,
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockKycResponse);
+
+      const result = await userAccess.getOrCreateKyc();
+
+      expect(result.status).toBe('rejected');
+      expect(result.rejectionReason).toBe('Document verification failed');
+    });
+
+    it('should throw error if not authenticated', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
+
+      await expect(userAccess.getOrCreateKyc()).rejects.toThrow('Not authenticated');
     });
   });
 });

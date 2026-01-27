@@ -137,6 +137,36 @@ export interface UserContact {
 }
 
 /**
+ * KYC verification status
+ */
+export type KycStatus = 'not_started' | 'pending' | 'in_review' | 'approved' | 'rejected';
+
+/**
+ * Terms of Service acceptance status
+ */
+export type TosStatus = 'pending' | 'approved';
+
+/**
+ * KYC status response
+ */
+export interface KycStatusResponse {
+  /** Current KYC status */
+  status: KycStatus;
+  /** Whether KYC is approved */
+  isApproved: boolean;
+  /** Reason for rejection (if rejected) */
+  rejectionReason: string | null;
+  /** KYC link ID (if KYC has been started) */
+  kycLinkId: string | null;
+  /** URL to complete KYC verification (if KYC has been started) */
+  kycLinkUrl: string | null;
+  /** Terms of Service acceptance status */
+  tosStatus: TosStatus | null;
+  /** URL to accept Terms of Service */
+  tosLink: string | null;
+}
+
+/**
  * User contact information payload
  */
 export interface UserContactPayload {
@@ -265,5 +295,33 @@ export class UserAccess {
    */
   async addUserContact(data: UserContactPayload): Promise<void> {
     return this.sdk.request('user:addUserContact', data);
+  }
+
+  /**
+   * Get or create KYC status
+   * 
+   * Returns the current KYC verification status. If KYC has not been started,
+   * it will be initiated and the response will include a URL to complete verification.
+   * 
+   * @param redirectUri - Optional URL to redirect user after KYC completion
+   * @returns KycStatusResponse with status and verification link if applicable
+   * @throws {Error} If user is not authenticated
+   * 
+   * @example
+   * ```typescript
+   * const kyc = await sdk.getUser().getOrCreateKyc();
+   * if (kyc.status === 'not_started' && kyc.kycLinkUrl) {
+   *   // Redirect user to complete KYC
+   *   window.open(kyc.kycLinkUrl, '_blank');
+   * } else if (kyc.isApproved) {
+   *   console.log('KYC approved!');
+   * }
+   * 
+   * // With redirect URI
+   * const kycWithRedirect = await sdk.getUser().getOrCreateKyc('https://myapp.com/callback');
+   * ```
+   */
+  async getOrCreateKyc(redirectUri?: string): Promise<KycStatusResponse> {
+    return this.sdk.request('user:getOrCreateKyc', redirectUri);
   }
 }

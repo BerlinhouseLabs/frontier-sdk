@@ -47,5 +47,8 @@
     "type": "git",
     "url": "git+https://github.com/BerlinhouseLabs/frontier-sdk.git"
   },
-  "readme": "README.md"
+  "readme": "README.md",
+  "dependencies": {
+    "qrcode.react": "^4.2.0"
+  }
 }

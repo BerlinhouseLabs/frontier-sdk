@@ -64,6 +64,8 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:getSupportedTokens` - Get list of supported tokens for swaps
 - `wallet:swap` - Execute token swaps (same-chain or cross-chain)
 - `wallet:quoteSwap` - Get quotes for token swaps
+- `wallet:getUsdDepositInstructions` - Get USD bank deposit instructions for fiat on-ramp
+- `wallet:getEurDepositInstructions` - Get EUR (SEPA) deposit instructions for fiat on-ramp
 
 ### Storage Permissions
 - `storage:get` - Read from storage
@@ -77,6 +79,7 @@ Your app must declare required permissions in the Frontier app registry:
 - `user:getReferralOverview` - Access referral statistics
 - `user:getReferralDetails` - Access detailed referral information
 - `user:addUserContact` - Add user contact information
+- `user:getOrCreateKyc` - Get or create KYC verification status
 
 ### Partnerships Permissions
 - `partnerships:listSponsors` - List sponsors you manage (paginated)

@@ -141,6 +141,54 @@ export interface SwapQuote {
 }
 
 /**
+ * USD deposit instructions for fiat on-ramp
+ */
+export interface UsdDepositInstructions {
+  /** Currency type */
+  currency: 'usd';
+  /** Bank name */
+  bankName: string;
+  /** Bank address */
+  bankAddress: string;
+  /** Bank routing number (ABA) */
+  bankRoutingNumber: string;
+  /** Bank account number */
+  bankAccountNumber: string;
+  /** Beneficiary name for the transfer */
+  bankBeneficiaryName: string;
+  /** Payment rail (e.g., 'ach', 'wire') */
+  paymentRail: string;
+}
+
+/**
+ * EUR deposit instructions for fiat on-ramp (SEPA)
+ */
+export interface EurDepositInstructions {
+  /** Currency type */
+  currency: 'eur';
+  /** IBAN for SEPA transfer */
+  iban: string;
+  /** BIC/SWIFT code */
+  bic: string;
+  /** Bank name */
+  bankName: string;
+  /** Beneficiary name for the transfer */
+  beneficiaryName: string;
+}
+
+/**
+ * Response containing deposit instructions for fiat on-ramp
+ */
+export interface OnRampResponse<T = UsdDepositInstructions | EurDepositInstructions> {
+  /** Currency type ('usd' or 'eur') */
+  currency: 'usd' | 'eur';
+  /** Deposit instructions specific to the currency */
+  depositInstructions: T;
+  /** Destination address where stablecoins will be sent */
+  destinationAddress: string;
+}
+
+/**
  * Wallet access class for interacting with the user's wallet
  * 
  * This class provides methods to:
@@ -613,5 +661,55 @@ export class WalletAccess {
       targetNetwork,
       amount,
     });
+  }
+
+  /**
+   * Get USD deposit instructions for fiat on-ramp
+   * 
+   * Returns US bank details where user should send their USD deposit.
+   * The deposited fiat will be converted to stablecoins and sent to
+   * the user's wallet address.
+   * 
+   * Requires approved KYC verification.
+   * 
+   * @returns Bank details including routing number, account number, and beneficiary info
+   * @throws {Error} If KYC is not approved
+   * 
+   * @example
+   * ```typescript
+   * const instructions = await sdk.getWallet().getUsdDepositInstructions();
+   * console.log('Bank:', instructions.depositInstructions.bankName);
+   * console.log('Routing:', instructions.depositInstructions.bankRoutingNumber);
+   * console.log('Account:', instructions.depositInstructions.bankAccountNumber);
+   * console.log('Beneficiary:', instructions.depositInstructions.bankBeneficiaryName);
+   * ```
+   */
+  async getUsdDepositInstructions(): Promise<OnRampResponse<UsdDepositInstructions>> {
+    return this.sdk.request('wallet:getUsdDepositInstructions');
+  }
+
+  /**
+   * Get EUR deposit instructions for fiat on-ramp (SEPA)
+   * 
+   * Returns SEPA bank details where user should send their EUR deposit.
+   * The deposited fiat will be converted to stablecoins and sent to
+   * the user's wallet address.
+   * 
+   * Requires approved KYC verification.
+   * 
+   * @returns SEPA bank details including IBAN, BIC, and beneficiary info
+   * @throws {Error} If KYC is not approved
+   * 
+   * @example
+   * ```typescript
+   * const instructions = await sdk.getWallet().getEurDepositInstructions();
+   * console.log('IBAN:', instructions.depositInstructions.iban);
+   * console.log('BIC:', instructions.depositInstructions.bic);
+   * console.log('Bank:', instructions.depositInstructions.bankName);
+   * console.log('Beneficiary:', instructions.depositInstructions.beneficiaryName);
+   * ```
+   */
+  async getEurDepositInstructions(): Promise<OnRampResponse<EurDepositInstructions>> {
+    return this.sdk.request('wallet:getEurDepositInstructions');
   }
 }

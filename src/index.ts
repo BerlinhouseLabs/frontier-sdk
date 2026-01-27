@@ -13,6 +13,9 @@ export type {
   SwapParams,
   SwapResult,
   SwapQuote,
+  UsdDepositInstructions,
+  EurDepositInstructions,
+  OnRampResponse,
 } from './access/wallet';
 
 export { SwapResultStatus } from './access/wallet';
