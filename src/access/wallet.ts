@@ -170,10 +170,8 @@ export interface EurDepositInstructions {
   iban: string;
   /** BIC/SWIFT code */
   bic: string;
-  /** Bank name */
-  bankName: string;
   /** Beneficiary name for the transfer */
-  beneficiaryName: string;
+  accountHolderName: string;
 }
 
 /**
@@ -186,6 +184,8 @@ export interface OnRampResponse<T = UsdDepositInstructions | EurDepositInstructi
   depositInstructions: T;
   /** Destination address where stablecoins will be sent */
   destinationAddress: string;
+  /** Destination network */
+  destinationNetwork: string;
 }
 
 /**
@@ -200,8 +200,8 @@ export interface LinkedBank {
   last4: string;
   /** Withdrawal address for this bank */
   withdrawalAddress: string;
-  /** Chain for withdrawals */
-  chain: string;
+  /** Network for withdrawals */
+  network: string;
 }
 
 /**
@@ -222,8 +222,8 @@ export interface LinkBankResponse {
   bankName: string;
   /** Withdrawal address for this bank */
   withdrawalAddress: string;
-  /** Chain for withdrawals */
-  chain: string;
+  /** Network for withdrawals */
+  network: string;
 }
 
 /**
