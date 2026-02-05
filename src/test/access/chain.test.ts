@@ -164,4 +164,52 @@ describe('ChainAccess', () => {
       expect(result.supportedTokens).toHaveLength(1);
     });
   });
+
+  describe('getContractAddresses', () => {
+    it('should request contract addresses', async () => {
+      const mockAddresses = {
+        fnd: '0xFND0000000000000000000000000000000000000',
+        iFnd: '0xiFND000000000000000000000000000000000000',
+        paymentRouter: '0xPaymentRouter000000000000000000000000000',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockAddresses);
+
+      const result = await chainAccess.getContractAddresses();
+
+      expect(mockSDK.request).toHaveBeenCalledWith('chain:getContractAddresses');
+      expect(result).toEqual(mockAddresses);
+    });
+
+    it('should return all contract address fields', async () => {
+      const mockAddresses = {
+        fnd: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        iFnd: '0x1234567890123456789012345678901234567890',
+        paymentRouter: '0x0000000000000000000000000000000000000000',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockAddresses);
+
+      const result = await chainAccess.getContractAddresses();
+
+      expect(result).toHaveProperty('fnd');
+      expect(result).toHaveProperty('iFnd');
+      expect(result).toHaveProperty('paymentRouter');
+    });
+
+    it('should handle null iFnd address', async () => {
+      const mockAddresses = {
+        fnd: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        iFnd: null,
+        paymentRouter: '0x0000000000000000000000000000000000000000',
+      };
+
+      vi.mocked(mockSDK.request).mockResolvedValue(mockAddresses);
+
+      const result = await chainAccess.getContractAddresses();
+
+      expect(result.fnd).toBe('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913');
+      expect(result.iFnd).toBeNull();
+    });
+  });
 });

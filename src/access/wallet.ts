@@ -250,6 +250,24 @@ export interface BillingAddress {
 export type AccountOwnerType = 'individual' | 'business';
 
 /**
+ * Deprecated smart account information
+ */
+export interface DeprecatedSmartAccount {
+  /** Unique identifier */
+  id: number;
+  /** Original EOA that controlled the smart account */
+  ownerAddress: string;
+  /** Deployed smart account contract address */
+  contractAddress: string;
+  /** Network identifier (e.g., 'base', 'base_sepolia') */
+  network: string;
+  /** When the account was deprecated */
+  deprecatedAt: string;
+  /** Smart account version at deployment */
+  version: number;
+}
+
+/**
  * Wallet access class for interacting with the user's wallet
  * 
  * This class provides methods to:
@@ -915,5 +933,59 @@ export class WalletAccess {
    */
   async deleteLinkedBank(bankId: string): Promise<void> {
     return this.sdk.request('wallet:deleteLinkedBank', { bankId });
+  }
+
+  /**
+   * Get all deprecated smart accounts for the authenticated user
+   * 
+   * Returns a list of deprecated smart accounts that still have active
+   * gas sponsorship. These are accounts from previous smart account versions
+   * that users may still need to interact with (e.g., to withdraw funds).
+   * 
+   * @returns List of deprecated smart accounts with their details
+   * 
+   * @example
+   * ```typescript
+   * const deprecatedAccounts = await sdk.getWallet().getDeprecatedSmartAccounts();
+   * deprecatedAccounts.forEach(account => {
+   *   console.log(`Account ${account.contractAddress} on ${account.network}`);
+   *   console.log(`Deprecated at: ${account.deprecatedAt}`);
+   *   console.log(`Version: ${account.version}`);
+   * });
+   * ```
+   */
+  async getDeprecatedSmartAccounts(): Promise<DeprecatedSmartAccount[]> {
+    return this.sdk.request('wallet:getDeprecatedSmartAccounts');
+  }
+
+  /**
+   * Pay via PaymentRouter with a payment reference ID using Frontier Dollar
+   * 
+   * Uses iFND (Internal Frontier Dollar) with priority, falling back to FND.
+   * Supports multi-token payments in a single transaction when splitting between iFND and FND.
+   * The paymentId is used to track the payment on-chain for order fulfillment.
+   * 
+   * @param to - Recipient address
+   * @param amount - Amount to pay in human-readable format (e.g., "10.50")
+   * @param paymentId - Payment reference UUID for tracking (must be a valid UUID)
+   * @returns Transaction receipt with hash and status
+   * @throws Error if paymentId is not a valid UUID
+   * 
+   * @example
+   * ```typescript
+   * const receipt = await sdk.getWallet().payWithFrontierDollar(
+   *   '0x1234...5678',
+   *   '25.00',
+   *   '550e8400-e29b-41d4-a716-446655440000'
+   * );
+   * console.log(`Payment tx: ${receipt.transactionHash}`);
+   * ```
+   */
+  async payWithFrontierDollar(
+    to: string,
+    amount: string,
+    paymentId: string
+  ): Promise<UserOperationReceipt> {
+    return this.sdk.request('wallet:payWithFrontierDollar', { to, amount, paymentId });
   }
 }

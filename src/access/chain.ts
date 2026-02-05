@@ -148,4 +148,27 @@ export class ChainAccess {
   async getCurrentChainConfig(): Promise<ChainConfig> {
     return this.sdk.request('chain:getCurrentChainConfig');
   }
+
+  /**
+   * Get contract addresses for the current chain
+   * 
+   * Returns the addresses for tokens (FND, iFND) and PaymentRouter contract.
+   * 
+   * @returns Object with token and PaymentRouter contract addresses
+   * 
+   * @example
+   * ```typescript
+   * const addresses = await sdk.getChain().getContractAddresses();
+   * console.log('FND:', addresses.fnd);
+   * console.log('iFND:', addresses.iFnd); // may be null
+   * console.log('PaymentRouter:', addresses.paymentRouter);
+   * ```
+   */
+  async getContractAddresses(): Promise<{
+    fnd: string;
+    iFnd: string | null;
+    paymentRouter: string;
+  }> {
+    return this.sdk.request('chain:getContractAddresses');
+  }
 }
