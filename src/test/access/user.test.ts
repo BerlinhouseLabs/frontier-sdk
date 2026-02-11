@@ -366,7 +366,7 @@ describe('UserAccess', () => {
         isApproved: false,
         rejectionReason: null,
         kycLinkId: 'kyc_new123',
-        kycLinkUrl: 'https://verify.bridge.xyz/new123',
+        kycLink: 'https://verify.bridge.xyz/new123',
         tosStatus: 'pending',
         tosLink: 'https://bridge.xyz/tos/new123',
       };
@@ -387,7 +387,7 @@ describe('UserAccess', () => {
         isApproved: false,
         rejectionReason: null,
         kycLinkId: 'kyc_new456',
-        kycLinkUrl: 'https://verify.bridge.xyz/new456',
+        kycLink: 'https://verify.bridge.xyz/new456',
         tosStatus: 'pending',
         tosLink: 'https://bridge.xyz/tos/new456',
       };
@@ -398,7 +398,7 @@ describe('UserAccess', () => {
       const result = await userAccess.getOrCreateKyc(redirectUri);
 
       expect(mockSDK.request).toHaveBeenCalledWith('user:getOrCreateKyc', redirectUri);
-      expect(result.kycLinkUrl).toBe('https://verify.bridge.xyz/new456');
+      expect(result.kycLink).toBe('https://verify.bridge.xyz/new456');
     });
 
     it('should return approved status when KYC already completed', async () => {
@@ -407,7 +407,7 @@ describe('UserAccess', () => {
         isApproved: true,
         rejectionReason: null,
         kycLinkId: 'kyc_existing123',
-        kycLinkUrl: null,
+        kycLink: null,
         tosStatus: 'approved',
         tosLink: null,
       };
@@ -418,7 +418,7 @@ describe('UserAccess', () => {
 
       expect(result.status).toBe('approved');
       expect(result.isApproved).toBe(true);
-      expect(result.kycLinkUrl).toBeNull();
+      expect(result.kycLink).toBeNull();
       expect(result.tosStatus).toBe('approved');
     });
 
@@ -428,7 +428,7 @@ describe('UserAccess', () => {
         isApproved: false,
         rejectionReason: null,
         kycLinkId: 'kyc_pending123',
-        kycLinkUrl: 'https://verify.bridge.xyz/pending123',
+        kycLink: 'https://verify.bridge.xyz/pending123',
         tosStatus: 'approved',
         tosLink: null,
       };
@@ -447,7 +447,7 @@ describe('UserAccess', () => {
         isApproved: false,
         rejectionReason: 'Document verification failed',
         kycLinkId: 'kyc_rejected123',
-        kycLinkUrl: null,
+        kycLink: null,
         tosStatus: 'approved',
         tosLink: null,
       };

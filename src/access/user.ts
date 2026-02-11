@@ -159,7 +159,7 @@ export interface KycStatusResponse {
   /** KYC link ID (if KYC has been started) */
   kycLinkId: string | null;
   /** URL to complete KYC verification (if KYC has been started) */
-  kycLinkUrl: string | null;
+  kycLink: string | null;
   /** Terms of Service acceptance status */
   tosStatus: TosStatus | null;
   /** URL to accept Terms of Service */
@@ -310,9 +310,9 @@ export class UserAccess {
    * @example
    * ```typescript
    * const kyc = await sdk.getUser().getOrCreateKyc();
-   * if (kyc.status === 'not_started' && kyc.kycLinkUrl) {
+   * if (kyc.status === 'not_started' && kyc.kycLink) {
    *   // Redirect user to complete KYC
-   *   window.open(kyc.kycLinkUrl, '_blank');
+   *   window.open(kyc.kycLink, '_blank');
    * } else if (kyc.isApproved) {
    *   console.log('KYC approved!');
    * }
