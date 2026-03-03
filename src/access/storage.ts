@@ -10,7 +10,7 @@ export class StorageAccess {
    * Get data from persistent storage
    * Requires permission: storage:get or storage:*
    */
-  async get(key: string): Promise<any> {
+  async get<T = any>(key: string): Promise<T> {
     return this.sdk.request('storage:get', { key });
   }
 

@@ -86,6 +86,12 @@ Your app must declare required permissions in the Frontier app registry:
 - `user:getReferralDetails` - Access detailed referral information
 - `user:addUserContact` - Add user contact information
 - `user:getOrCreateKyc` - Get or create KYC verification status
+- `user:createSignupRequest` - Submit a new membership signup request with crypto payment
+- `user:getVerifiedAccessControls` - Get cryptographically verified access controls
+
+### Communities Permissions
+- `communities:listCommunities` - List all visible communities (paginated)
+- `communities:getCommunity` - Get a community by ID or slug
 
 ### Partnerships Permissions
 - `partnerships:listSponsors` - List sponsors you manage (paginated)
@@ -118,7 +124,29 @@ Your app must declare required permissions in the Frontier app registry:
 - `chain:getAvailableNetworks` - Get list of available networks
 - `chain:switchNetwork` - Switch to a different network
 - `chain:getCurrentChainConfig` - Get full chain configuration
-- `chain:getContractAddresses` - Get FND and iFND contract addresses
+- `chain:getContractAddresses` - Get FND, iFND, PaymentRouter, and SubscriptionManager contract addresses
+
+## Verified Access Controls
+
+Third-party apps run inside sandboxed iframes hosted by the PWA (Frontier Wallet). Because all SDK communication passes through the PWA host via `postMessage`, the host is a potential man-in-the-middle: it could, in theory, modify or fabricate user data before relaying it to your app.
+
+**`user:getVerifiedAccessControls`** solves this by providing a cryptographically signed payload directly from the Frontier API server. The SDK verifies the ECDSA secp256k1 signature against hardcoded per-environment public keys *inside your iframe*, meaning the host cannot tamper with the data without breaking the signature.
+
+**Always use `getVerifiedAccessControls()` when making access decisions** — never trust unsigned user data from other SDK methods for gating features, content, or permissions.
+
+```typescript
+const access = await sdk.getUser().getVerifiedAccessControls();
+
+// These fields are cryptographically guaranteed by the API server:
+console.log(access.subscriptionStatus); // 'active', 'canceled', 'awaiting_approval', or null
+console.log(access.subscriptionPlan);   // 'citizen', 'network-society', etc.
+console.log(access.communities);        // ['arts-music', 'tech']
+console.log(access.addOns);             // ['globetrotter']
+console.log(access.isStaff);            // boolean
+console.log(access.email);              // user's email
+```
+
+The method throws if the signature is invalid or the public key for the environment is not configured. Wrap the call in a try/catch and deny access on failure.
 
 ## Security
 

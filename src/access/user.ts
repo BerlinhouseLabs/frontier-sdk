@@ -1,4 +1,5 @@
 import type { FrontierSDK } from '../sdk';
+import { verifyAccessControls, type AccessControlsPayload, type SignedAccessControls } from '../access-controls';
 
 /**
  * Basic user information
@@ -175,6 +176,52 @@ export interface UserContactPayload {
 }
 
 /**
+ * Signup request creation payload (crypto only)
+ */
+export interface CreateSignupRequestPayload {
+  /** Subscription plan identifier */
+  subscriptionPlan: string;
+  /** Billing interval (e.g., 'monthly', 'yearly') */
+  subscriptionInterval: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  socialSite: string;
+  socialHandle: string;
+  currentWork: string;
+  howDidYouHearAboutUs: string;
+  braggingStatement: string;
+  contributionStatement: string;
+  billingFirstName: string;
+  billingLastName: string;
+  billingEmail: string;
+  billingPhoneNumber: string;
+  /** Must be 'crypto' */
+  paymentProvider: 'crypto';
+  /** Smart account ID to use for payment */
+  smartAccount: number;
+  community: string;
+  githubHandle?: string;
+  notableWork?: string;
+  referralCode?: string;
+  receiveUpdates?: boolean;
+  optInSms?: boolean;
+  organization?: string;
+  organizationRole?: string;
+}
+
+/**
+ * Signup request creation response
+ */
+export interface CreateSignupRequestResponse {
+  /** UUID of the created subscription */
+  subscriptionUuid: string;
+  /** Payment provider used */
+  paymentProvider: string;
+}
+
+/**
  * User access class for interacting with user information
  * 
  * This class provides methods to:
@@ -323,5 +370,63 @@ export class UserAccess {
    */
   async getOrCreateKyc(redirectUri?: string): Promise<KycStatusResponse> {
     return this.sdk.request('user:getOrCreateKyc', redirectUri);
+  }
+
+  /**
+   * Create a signup request with crypto payment
+   * 
+   * Submits a new membership signup request. The smart account will be used
+   * to process the crypto payment for the chosen subscription plan.
+   * 
+   * @param payload - Signup request details including personal info, billing, and plan
+   * @returns Response containing the subscription UUID
+   * @throws {Error} If user is not authenticated or request is invalid
+   * 
+   * @example
+   * ```typescript
+   * const result = await sdk.getUser().createSignupRequest({
+   *   subscriptionPlan: 'network-society',
+   *   subscriptionInterval: 'monthly',
+   *   firstName: 'Jane',
+   *   lastName: 'Doe',
+   *   email: 'jane@example.com',
+   *   paymentProvider: 'crypto',
+   *   smartAccount: 42,
+   *   // ...other required fields
+   * });
+   * console.log('Subscription UUID:', result.subscriptionUuid);
+   * ```
+   */
+  async createSignupRequest(payload: CreateSignupRequestPayload): Promise<CreateSignupRequestResponse> {
+    return this.sdk.request('user:createSignupRequest', payload);
+  }
+
+  /**
+   * Get the verified access controls data for the current user
+   * 
+   * Returns the cryptographically verified access controls payload signed by
+   * the Frontier API server. The SDK verifies the ECDSA secp256k1 signature
+   * against hardcoded per-environment public keys before returning the data.
+   * 
+   * This data includes subscription status, community memberships, add-ons,
+   * and other access-related information that can be trusted by third-party apps.
+   * 
+   * @returns Verified access controls payload
+   * @throws {Error} If access controls are not available or signature verification failed
+   * 
+   * @example
+   * ```typescript
+   * const accessData = await sdk.getUser().getVerifiedAccessControls();
+   * if (accessData) {
+   *   console.log('Subscription:', accessData.subscriptionPlan);
+   *   console.log('Communities:', accessData.communities);
+   *   console.log('Add-ons:', accessData.addOns);
+   *   console.log('Is staff:', accessData.isStaff);
+   * }
+   * ```
+   */
+  async getVerifiedAccessControls(): Promise<AccessControlsPayload> {
+    const signed: SignedAccessControls = await this.sdk.request('user:getVerifiedAccessControls');
+    return verifyAccessControls(signed);
   }
 }

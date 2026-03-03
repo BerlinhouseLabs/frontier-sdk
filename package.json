@@ -1,6 +1,6 @@
 {
   "name": "@frontiertower/frontier-sdk",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "description": "SDK for building apps on Frontier Wallet",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -49,6 +49,7 @@
   },
   "readme": "README.md",
   "dependencies": {
+    "@noble/secp256k1": "^2.3.0",
     "qrcode.react": "^4.2.0"
   }
 }

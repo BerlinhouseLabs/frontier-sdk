@@ -1,5 +1,5 @@
 export { FrontierSDK } from './sdk';
-export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess } from './access';
+export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess } from './access';
 export type { SDKRequest, SDKResponse } from './types';
 
 // Export wallet types
@@ -45,6 +45,12 @@ export type {
   UserContactPayload,
 } from './access/user';
 
+// Export access controls types
+export type {
+  AccessControlsPayload,
+  SignedAccessControls,
+} from './access-controls';
+
 // Export partnerships types
 export type {
   SponsorPass,
@@ -73,6 +79,12 @@ export type {
   RotateWebhookKeyResponse,
   ListParams,
 } from './access/third-party';
+
+// Export communities types
+export type {
+  Community,
+  ListCommunitiesParams,
+} from './access/communities';
 
 // Export UI utilities
 export { isInFrontierApp, getParentOrigin } from './ui-utils/detection';

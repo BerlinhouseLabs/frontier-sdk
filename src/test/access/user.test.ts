@@ -466,4 +466,50 @@ describe('UserAccess', () => {
       await expect(userAccess.getOrCreateKyc()).rejects.toThrow('Not authenticated');
     });
   });
+
+  describe('getVerifiedAccessControls', () => {
+    // Signed by API TEST_PRIVATE_KEY_HEX; public key for stage "test" is in access-controls.ts
+    const VALID_SIGNED_ENVELOPE = {
+      accessControls: 'eyJhZGRPbnMiOlsiZ2xvYmV0cm90dGVyIl0sImNvbW11bml0aWVzIjpbImFydHMtbXVzaWMiXSwiZW1haWwiOiJ0ZXN0QGZyb250aWVyLmNvbSIsImlzU3RhZmYiOmZhbHNlLCJpc1N1cGVydXNlciI6ZmFsc2UsImtpZCI6InYxIiwibWFuYWdlZENvbW11bml0aWVzIjpbXSwic21hcnRBY2NvdW50QWRkcmVzcyI6IjB4MTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3OCIsInN1YnNjcmlwdGlvbkludGVydmFsIjoibW9udGhseSIsInN1YnNjcmlwdGlvblBsYW4iOiJjaXRpemVuIiwic3Vic2NyaXB0aW9uU3RhdHVzIjoiYWN0aXZlIiwic3Vic2NyaXB0aW9uVHlwZSI6ImNyeXB0byIsInRpbWVzdGFtcCI6IjIwMjUtMDEtMDFUMDA6MDA6MDArMDA6MDAifQ==',
+      stage: 'test',
+      signature: '035c41587812bad2f2aa4e33fe8e980a1a8818e67441b7da43f549c0fdfad29b661a003a87ca6d4c0eb17a90cee47d3908065018c84c405074bd85e10ded8dcf',
+    };
+
+    it('should request access controls and verify the signature', async () => {
+      vi.mocked(mockSDK.request).mockResolvedValue(VALID_SIGNED_ENVELOPE);
+
+      const result = await userAccess.getVerifiedAccessControls();
+
+      expect(mockSDK.request).toHaveBeenCalledWith('user:getVerifiedAccessControls');
+      expect(result.email).toBe('test@frontier.com');
+      expect(result.subscriptionPlan).toBe('citizen');
+      expect(result.subscriptionStatus).toBe('active');
+      expect(result.addOns).toEqual(['globetrotter']);
+      expect(result.communities).toEqual(['arts-music']);
+    });
+
+    it('should throw if host returns tampered payload', async () => {
+      vi.mocked(mockSDK.request).mockResolvedValue({
+        ...VALID_SIGNED_ENVELOPE,
+        accessControls: VALID_SIGNED_ENVELOPE.accessControls.slice(0, -2) + 'XX',
+      });
+
+      await expect(userAccess.getVerifiedAccessControls()).rejects.toThrow();
+    });
+
+    it('should throw if host returns tampered signature', async () => {
+      vi.mocked(mockSDK.request).mockResolvedValue({
+        ...VALID_SIGNED_ENVELOPE,
+        signature: 'aa' + VALID_SIGNED_ENVELOPE.signature.slice(2),
+      });
+
+      await expect(userAccess.getVerifiedAccessControls()).rejects.toThrow();
+    });
+
+    it('should throw if not authenticated', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
+
+      await expect(userAccess.getVerifiedAccessControls()).rejects.toThrow('Not authenticated');
+    });
+  });
 });
