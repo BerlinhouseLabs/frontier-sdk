@@ -174,6 +174,23 @@ npm run build
 npm run dev
 ```
 
+### Publishing to npm
+
+The package is published to npm as `@frontiertower/frontier-sdk`.
+
+```bash
+# 1. Log in to npm (one-time setup)
+npm login
+
+# 2. Bump the version (patch/minor/major)
+npm version patch  # e.g. 0.15.0 → 0.15.1
+
+# 3. Build and publish (prepublishOnly runs build automatically)
+npm publish --access public
+```
+
+> **Note:** `npm publish` automatically runs `npm run build` via the `prepublishOnly` script before publishing.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
