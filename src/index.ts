@@ -1,5 +1,5 @@
 export { FrontierSDK } from './sdk';
-export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess } from './access';
+export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess, EventsAccess } from './access';
 export type { SDKRequest, SDKResponse } from './types';
 
 // Export wallet types
@@ -85,6 +85,23 @@ export type {
   Community,
   ListCommunitiesParams,
 } from './access/communities';
+
+// Export events types
+export type {
+  Event,
+  EventType,
+  EventService,
+  EventStatus,
+  ReviewStatus,
+  LocationType,
+  ListEventsParams,
+  CreateEventRequest,
+  Location,
+  ListLocationsParams,
+  RoomBooking,
+  ListRoomBookingsParams,
+  CreateRoomBookingRequest,
+} from './access/events';
 
 // Export UI utilities
 export { isInFrontierApp, getParentOrigin } from './ui-utils/detection';
