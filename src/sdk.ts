@@ -6,6 +6,7 @@ import { UserAccess } from './access/user';
 import { PartnershipsAccess } from './access/partnerships';
 import { ThirdPartyAccess } from './access/third-party';
 import { CommunitiesAccess } from './access/communities';
+import { EventsAccess } from './access/events';
 
 export class FrontierSDK {
   private requestId = 0;
@@ -17,6 +18,7 @@ export class FrontierSDK {
   private partnerships: PartnershipsAccess;
   private thirdParty: ThirdPartyAccess;
   private communities: CommunitiesAccess;
+  private events: EventsAccess;
 
   constructor() {
     this.wallet = new WalletAccess(this);
@@ -26,6 +28,7 @@ export class FrontierSDK {
     this.partnerships = new PartnershipsAccess(this);
     this.thirdParty = new ThirdPartyAccess(this);
     this.communities = new CommunitiesAccess(this);
+    this.events = new EventsAccess(this);
     
     window.addEventListener('message', this.handleMessage);
     this.notifyReady();
@@ -119,6 +122,13 @@ export class FrontierSDK {
    */
   getCommunities(): CommunitiesAccess {
     return this.communities;
+  }
+
+  /**
+   * Get events access instance
+   */
+  getEvents(): EventsAccess {
+    return this.events;
   }
 
   /**
