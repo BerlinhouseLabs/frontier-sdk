@@ -120,12 +120,9 @@ describe('EventsAccess', () => {
   describe('listLocations', () => {
     it('should request locations with filter', async () => {
       const mockLocations: Location[] = [{
-        id: 1, readableId: 'spaceship', name: 'Spaceship', description: 'Main event space',
-        directions: '3rd floor', locationType: 'event_space', warmupBuffer: '00:10:00',
-        cooldownBuffer: '00:15:00', onlyFoundingCitizensCanBook: false,
-        onlyOfficeSubscriptionHoldersCanBook: false, onlyFloorLeadsCanBook: false,
-        owner: null, floorLocation: '', openBooking: false, staffOnly: false,
-        maxCapacity: 100, requiresApproval: false,
+        id: 1, owner: null, readableId: 'spaceship', name: 'Spaceship', maxCapacity: 100,
+        description: 'Main event space', directions: '3rd floor', locationType: 'event_space',
+        warmupBuffer: '00:10:00', cooldownBuffer: '00:15:00', openBooking: false, floorLocation: '',
       }];
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockLocations);
@@ -151,7 +148,7 @@ describe('EventsAccess', () => {
         count: 1,
         results: [{
           id: 1, startsAt: '2025-06-10T14:00:00Z', endsAt: '2025-06-10T15:00:00Z',
-          location: 'room-201', host: 'John', community: null, reviewStatus: 'approved', status: 'active',
+          location: 'room-201',
         }],
       };
 
@@ -168,7 +165,7 @@ describe('EventsAccess', () => {
     it('should request room booking creation', async () => {
       const mockBooking: RoomBooking = {
         id: 1, startsAt: '2025-06-20T14:00:00Z', endsAt: '2025-06-20T15:00:00Z',
-        location: 'room-201', host: 'John', community: null, reviewStatus: 'approved', status: 'active',
+        location: 'room-201',
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockBooking);

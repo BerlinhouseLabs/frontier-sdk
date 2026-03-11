@@ -104,38 +104,28 @@ export interface CreateEventRequest {
 export interface Location {
   /** Location database ID */
   id: number;
-  /** URL-safe slug identifier */
+  /** Owning community ID, or null */
+  owner: number | null;
+  /** URL-safe slug identifier (e.g. "spaceship", "room-201") */
   readableId: string;
   /** Display name */
   name: string;
+  /** Maximum capacity */
+  maxCapacity: number;
   /** Description */
   description: string;
   /** Directions to find the location */
   directions: string;
   /** Type of space */
   locationType: LocationType;
-  /** Warmup buffer duration (ISO 8601) */
+  /** Warmup buffer duration (e.g. "00:10:00" = 10 min) */
   warmupBuffer: string;
-  /** Cooldown buffer duration (ISO 8601) */
+  /** Cooldown buffer duration (e.g. "00:15:00" = 15 min) */
   cooldownBuffer: string;
-  /** Restrict to founding citizens */
-  onlyFoundingCitizensCanBook: boolean;
-  /** Restrict to office subscription holders */
-  onlyOfficeSubscriptionHoldersCanBook: boolean;
-  /** Restrict to floor leads */
-  onlyFloorLeadsCanBook: boolean;
-  /** Owning community ID, or null */
-  owner: number | null;
+  /** Allow users outside owner community to book */
+  openBooking: boolean;
   /** Floor plan image URL */
   floorLocation: string;
-  /** Allow outside community to book */
-  openBooking: boolean;
-  /** Staff-only restriction */
-  staffOnly: boolean;
-  /** Maximum capacity */
-  maxCapacity: number;
-  /** Requires manager approval */
-  requiresApproval: boolean;
 }
 
 /** Parameters for listing locations */
@@ -154,14 +144,6 @@ export interface RoomBooking {
   endsAt: string;
   /** Location readable_id */
   location: string;
-  /** Host full name */
-  host: string;
-  /** Community ID, or null */
-  community: number | null;
-  /** Approval status */
-  reviewStatus: ReviewStatus;
-  /** Booking lifecycle status */
-  status: EventStatus;
 }
 
 /** Parameters for listing room bookings */
