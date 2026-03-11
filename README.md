@@ -119,6 +119,14 @@ Your app must declare required permissions in the Frontier app registry:
 - `thirdParty:deleteWebhook` - Delete a webhook
 - `thirdParty:rotateWebhookSigningKey` - Rotate webhook signing key
 
+### Events Permissions
+- `events:listEvents` - List events with optional filters (paginated)
+- `events:createEvent` - Create a new event
+- `events:addEventHost` - Add a co-host to an event
+- `events:listLocations` - List available locations (event spaces and rooms)
+- `events:listRoomBookings` - List room bookings (paginated)
+- `events:createRoomBooking` - Create a room booking
+
 ### Chain Permissions
 - `chain:getCurrentNetwork` - Get current network name
 - `chain:getAvailableNetworks` - Get list of available networks
