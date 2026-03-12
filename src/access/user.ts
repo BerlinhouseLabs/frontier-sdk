@@ -17,8 +17,6 @@ export interface User {
   isActive: boolean;
   /** Date user joined */
   dateJoined: string;
-  /** Whether user is staff */
-  isStaff: boolean;
   /** Whether user is superuser */
   isSuperuser: boolean;
 }
@@ -421,7 +419,6 @@ export class UserAccess {
    *   console.log('Subscription:', accessData.subscriptionPlan);
    *   console.log('Communities:', accessData.communities);
    *   console.log('Add-ons:', accessData.addOns);
-   *   console.log('Is staff:', accessData.isStaff);
    * }
    * ```
    */
