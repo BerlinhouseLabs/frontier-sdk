@@ -128,6 +128,12 @@ Your app must declare required permissions in the Frontier app registry:
 - `thirdParty:deleteWebhook` - Delete a webhook
 - `thirdParty:rotateWebhookSigningKey` - Rotate webhook signing key
 
+### Offices Permissions
+- `offices:createAccessPass` - Create an access pass for a membership contract
+- `offices:listAccessPasses` - List access passes for managed contracts (paginated)
+- `offices:getAccessPass` - Retrieve an access pass by ID
+- `offices:revokeAccessPass` - Revoke an access pass
+
 ### Events Permissions
 - `events:listEvents` - List events with optional filters (paginated)
 - `events:createEvent` - Create a new event

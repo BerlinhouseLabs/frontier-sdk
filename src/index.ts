@@ -1,5 +1,5 @@
 export { FrontierSDK } from './sdk';
-export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess, EventsAccess } from './access';
+export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess, EventsAccess, OfficesAccess } from './access';
 export type { SDKRequest, SDKResponse } from './types';
 
 // Export wallet types
@@ -110,6 +110,14 @@ export type {
   ListRoomBookingsParams,
   CreateRoomBookingRequest,
 } from './access/events';
+
+// Export offices types
+export type {
+  AccessPass,
+  AccessPassStatus,
+  CreateAccessPassRequest,
+  ListAccessPassesParams,
+} from './access/offices';
 
 // Export UI utilities
 export { isInFrontierApp, getParentOrigin } from './ui-utils/detection';
