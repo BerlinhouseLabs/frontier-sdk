@@ -4,9 +4,9 @@ import { verifyAccessControls, type SignedAccessControls } from '../access-contr
 // Test fixture: signed by API's TEST_PRIVATE_KEY_HEX (4c0883a...)
 // Public key for stage "test" is hardcoded in access-controls.ts
 const VALID_ENVELOPE: SignedAccessControls = {
-  accessControls: 'eyJhZGRPbnMiOlsiZ2xvYmV0cm90dGVyIl0sImNvbW11bml0aWVzIjpbImFydHMtbXVzaWMiXSwiZW1haWwiOiJ0ZXN0QGZyb250aWVyLmNvbSIsImlzU3RhZmYiOmZhbHNlLCJpc1N1cGVydXNlciI6ZmFsc2UsImtpZCI6InYxIiwibWFuYWdlZENvbW11bml0aWVzIjpbXSwic21hcnRBY2NvdW50QWRkcmVzcyI6IjB4MTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3OCIsInN1YnNjcmlwdGlvbkludGVydmFsIjoibW9udGhseSIsInN1YnNjcmlwdGlvblBsYW4iOiJjaXRpemVuIiwic3Vic2NyaXB0aW9uU3RhdHVzIjoiYWN0aXZlIiwic3Vic2NyaXB0aW9uVHlwZSI6ImNyeXB0byIsInRpbWVzdGFtcCI6IjIwMjUtMDEtMDFUMDA6MDA6MDArMDA6MDAifQ==',
+  accessControls: 'eyJhZGRPbnMiOlsiZ2xvYmV0cm90dGVyIl0sImNvbW11bml0aWVzIjpbImFydHMtbXVzaWMiXSwiZW1haWwiOiJ0ZXN0QGZyb250aWVyLmNvbSIsImlzU3VwZXJ1c2VyIjpmYWxzZSwia2lkIjoidjEiLCJtYW5hZ2VkQ29tbXVuaXRpZXMiOltdLCJzbWFydEFjY291bnRBZGRyZXNzIjoiMHgxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4Iiwic3Vic2NyaXB0aW9uSW50ZXJ2YWwiOiJtb250aGx5Iiwic3Vic2NyaXB0aW9uUGxhbiI6ImNpdGl6ZW4iLCJzdWJzY3JpcHRpb25TdGF0dXMiOiJhY3RpdmUiLCJzdWJzY3JpcHRpb25UeXBlIjoiY3J5cHRvIiwidGltZXN0YW1wIjoiMjAyNS0wMS0wMVQwMDowMDowMCswMDowMCJ9',
   stage: 'test',
-  signature: '035c41587812bad2f2aa4e33fe8e980a1a8818e67441b7da43f549c0fdfad29b661a003a87ca6d4c0eb17a90cee47d3908065018c84c405074bd85e10ded8dcf',
+  signature: 'd6f3cd55298d8d227778d5ba8881e2fbc48dfc2534758a1a34f97ac1f6c98658248ed38031ff7840de6ef07bd2d4ed7798d758033502f10a0f5e2f1808cb8eb3',
 };
 
 describe('verifyAccessControls', () => {
@@ -14,7 +14,6 @@ describe('verifyAccessControls', () => {
     const payload = await verifyAccessControls(VALID_ENVELOPE);
 
     expect(payload.email).toBe('test@frontier.com');
-    expect(payload.isStaff).toBe(false);
     expect(payload.isSuperuser).toBe(false);
     expect(payload.subscriptionStatus).toBe('active');
     expect(payload.subscriptionPlan).toBe('citizen');

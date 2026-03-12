@@ -7,7 +7,6 @@ import { verify, Signature } from '@noble/secp256k1';
 export interface AccessControlsPayload {
   smartAccountAddress: string | null;
   email: string;
-  isStaff: boolean;
   isSuperuser: boolean;
   /** e.g. 'active', 'canceled', 'awaiting_approval', or null if no subscription */
   subscriptionStatus: string | null;
