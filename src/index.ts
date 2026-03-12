@@ -84,6 +84,14 @@ export type {
 export type {
   Community,
   ListCommunitiesParams,
+  InternshipPass,
+  InternshipPassStatus,
+  CreateInternshipPassRequest,
+  ListInternshipPassesParams,
+  ReassignRequest,
+  ReassignRequestStatus,
+  CreateReassignRequestPayload,
+  ListReassignRequestsParams,
 } from './access/communities';
 
 // Export events types
