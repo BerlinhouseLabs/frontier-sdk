@@ -92,6 +92,15 @@ Your app must declare required permissions in the Frontier app registry:
 ### Communities Permissions
 - `communities:listCommunities` - List all visible communities (paginated)
 - `communities:getCommunity` - Get a community by ID or slug
+- `communities:createInternshipPass` - Create an internship pass for a managed community
+- `communities:listInternshipPasses` - List internship passes for managed communities (paginated)
+- `communities:getInternshipPass` - Retrieve an internship pass by ID
+- `communities:revokeInternshipPass` - Revoke an internship pass
+- `communities:createReassignRequest` - Create a member reassignment request
+- `communities:listReassignRequests` - List pending reassignment requests (paginated)
+- `communities:getReassignRequest` - Retrieve a reassignment request by ID
+- `communities:acceptReassignRequest` - Accept a reassignment request (moves member)
+- `communities:rejectReassignRequest` - Reject a reassignment request
 
 ### Partnerships Permissions
 - `partnerships:listSponsors` - List sponsors you manage (paginated)
