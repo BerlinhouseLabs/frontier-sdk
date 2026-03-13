@@ -165,7 +165,6 @@ console.log(access.subscriptionStatus); // 'active', 'canceled', 'awaiting_appro
 console.log(access.subscriptionPlan);   // 'citizen', 'network-society', etc.
 console.log(access.communities);        // ['arts-music', 'tech']
 console.log(access.addOns);             // ['globetrotter']
-console.log(access.isStaff);            // boolean
 console.log(access.email);              // user's email
 ```
 
