@@ -7,3 +7,4 @@ export { ThirdPartyAccess } from './third-party';
 export { CommunitiesAccess } from './communities';
 export { EventsAccess } from './events';
 export { OfficesAccess } from './offices';
+export { NavigationAccess } from './navigation';

@@ -8,6 +8,7 @@ import { ThirdPartyAccess } from './access/third-party';
 import { CommunitiesAccess } from './access/communities';
 import { EventsAccess } from './access/events';
 import { OfficesAccess } from './access/offices';
+import { NavigationAccess } from './access/navigation';
 
 export class FrontierSDK {
   private requestId = 0;
@@ -21,6 +22,7 @@ export class FrontierSDK {
   private communities: CommunitiesAccess;
   private events: EventsAccess;
   private offices: OfficesAccess;
+  private navigation: NavigationAccess;
 
   constructor() {
     this.wallet = new WalletAccess(this);
@@ -32,6 +34,7 @@ export class FrontierSDK {
     this.communities = new CommunitiesAccess(this);
     this.events = new EventsAccess(this);
     this.offices = new OfficesAccess(this);
+    this.navigation = new NavigationAccess(this);
 
     window.addEventListener('message', this.handleMessage);
     this.notifyReady();
@@ -142,11 +145,19 @@ export class FrontierSDK {
   }
 
   /**
+   * Get navigation access instance
+   */
+  getNavigation(): NavigationAccess {
+    return this.navigation;
+  }
+
+  /**
    * Cleanup: Remove event listeners
    * Call this when your app is being destroyed
    */
   destroy(): void {
     window.removeEventListener('message', this.handleMessage);
+    this.navigation.destroy();
     this.pendingRequests.clear();
   }
 }

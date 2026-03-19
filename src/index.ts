@@ -1,5 +1,5 @@
 export { FrontierSDK } from './sdk';
-export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess, EventsAccess, OfficesAccess } from './access';
+export { WalletAccess, StorageAccess, ChainAccess, UserAccess, PartnershipsAccess, ThirdPartyAccess, CommunitiesAccess, EventsAccess, OfficesAccess, NavigationAccess } from './access';
 export type { SDKRequest, SDKResponse } from './types';
 
 // Export wallet types
@@ -118,6 +118,12 @@ export type {
   CreateAccessPassRequest,
   ListAccessPassesParams,
 } from './access/offices';
+
+// Export navigation types
+export type {
+  NavigationOpenAppOptions,
+  DeepLinkData,
+} from './access/navigation';
 
 // Export UI utilities
 export { isInFrontierApp, getParentOrigin } from './ui-utils/detection';
