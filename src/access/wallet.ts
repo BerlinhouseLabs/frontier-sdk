@@ -957,35 +957,4 @@ export class WalletAccess {
   async getDeprecatedSmartAccounts(): Promise<DeprecatedSmartAccount[]> {
     return this.sdk.request('wallet:getDeprecatedSmartAccounts');
   }
-
-  /**
-   * Pay via PaymentRouter with a payment reference ID using Frontier Dollar
-   * 
-   * Uses iFND (Internal Frontier Dollar) with priority, falling back to FND.
-   * Supports multi-token payments in a single transaction when splitting between iFND and FND.
-   * The paymentId is used to track the payment on-chain for order fulfillment.
-   * 
-   * @param to - Recipient address
-   * @param amount - Amount to pay in human-readable format (e.g., "10.50")
-   * @param paymentId - Payment reference UUID for tracking (must be a valid UUID)
-   * @returns Transaction receipt with hash and status
-   * @throws Error if paymentId is not a valid UUID
-   * 
-   * @example
-   * ```typescript
-   * const receipt = await sdk.getWallet().payWithFrontierDollar(
-   *   '0x1234...5678',
-   *   '25.00',
-   *   '550e8400-e29b-41d4-a716-446655440000'
-   * );
-   * console.log(`Payment tx: ${receipt.transactionHash}`);
-   * ```
-   */
-  async payWithFrontierDollar(
-    to: string,
-    amount: string,
-    paymentId: string
-  ): Promise<UserOperationReceipt> {
-    return this.sdk.request('wallet:payWithFrontierDollar', { to, amount, paymentId });
-  }
 }

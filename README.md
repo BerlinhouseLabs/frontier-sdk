@@ -71,7 +71,6 @@ Your app must declare required permissions in the Frontier app registry:
 - `wallet:linkEuroAccount` - Link a EUR/IBAN bank account for EUR withdrawals
 - `wallet:deleteLinkedBank` - Delete a linked bank account
 - `wallet:getDeprecatedSmartAccounts` - Get deprecated smart accounts with active gas sponsorship
-- `wallet:payWithFrontierDollar` - Pay via PaymentRouter with payment reference ID
 
 ### Storage Permissions
 - `storage:get` - Read from storage
