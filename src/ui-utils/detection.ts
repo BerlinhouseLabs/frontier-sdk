@@ -4,8 +4,6 @@
 export const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'https://sandbox.os.frontiertower.io',
-  'https://alpha.os.frontiertower.io',
-  'https://beta.os.frontiertower.io',
   'https://os.frontiertower.io',
 ];
 
