@@ -242,8 +242,6 @@ The SDK verifies that apps are running in legitimate Frontier Wallet instances. 
 
 - `http://localhost:5173` (development)
 - `https://sandbox.os.frontiertower.io`
-- `https://alpha.os.frontiertower.io`
-- `https://beta.os.frontiertower.io`
 - `https://os.frontiertower.io` (production)
 
 ## Development
