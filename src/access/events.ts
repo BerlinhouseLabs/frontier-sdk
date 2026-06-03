@@ -56,6 +56,10 @@ export interface Event {
   reviewStatus: ReviewStatus;
   /** Event lifecycle status */
   status: EventStatus;
+  /** True iff the requesting user is this event's host (the user the deposit endpoints authorize). */
+  isHost?: boolean;
+  /** Read-only security-deposit summary, or null when the event has no deposit row. */
+  deposit?: EventDeposit | null;
 }
 
 /** Parameters for listing events */
@@ -168,6 +172,87 @@ export interface CreateRoomBookingRequest {
   endsAt: string;
   /** Location readable_id (must be ROOM type) */
   location: string;
+}
+
+/**
+ * Compact security-deposit status exposed read-only on the event payload (for host UI gating).
+ * The "secure deposit" CTA keys off `required` (optionally `pending`); `failed` is terminal.
+ */
+export type DepositStatus =
+  | 'not_required'
+  | 'required'
+  | 'pending'
+  | 'secured'
+  | 'released'
+  | 'withheld'
+  | 'failed';
+
+/** Read-only security-deposit summary on the event payload (null when the event has no deposit). */
+export interface EventDeposit {
+  /** Compact deposit lifecycle status. */
+  status: DepositStatus;
+  /** Snapshotted deposit amount in `currency` (e.g. 400 for the FND rail). */
+  amount: number;
+  /** Currency code, e.g. "usd". */
+  currency: string;
+}
+
+/** A candidate token for the FND deposit, in preference order (iFND first, then public FND). */
+export interface DepositPreflightToken {
+  /** Token key, e.g. "ifnd_token" or "fnd_token". */
+  key: string;
+  /** ERC-20 contract address to approve the allowance on. */
+  address: string;
+  /** On-chain token decimals (read from the contract, never assumed). */
+  decimals: number;
+  /** Deposit amount in this token's base units, as a decimal string (pass to approveERC20 as a BigInt). */
+  baseUnits: string;
+}
+
+/**
+ * Response of `getCryptoDepositPreflight` — everything needed to approve the right ERC-20
+ * allowance to `spender` before placing the deposit. Read-only.
+ */
+export interface DepositPreflight {
+  /** Address to approve the allowance to (the platform treasury / spender). Never hardcode it. */
+  spender: string;
+  /** Network key, e.g. "base" (prod) or "base_sepolia" (sandbox). */
+  network: string;
+  /** Deposit amount in `currency`, as a decimal string (e.g. "400.00"). */
+  amount: string;
+  /** Currency code, e.g. "usd". */
+  currency: string;
+  /** Candidate tokens in preference order: iFND first, then public FND. */
+  tokens: DepositPreflightToken[];
+}
+
+/** Raw deposit status returned by `placeCryptoDeposit`. */
+export type CryptoDepositStatus =
+  | 'secured'
+  | 'awaiting_payment'
+  | 'grant'
+  | 'released'
+  | 'withheld'
+  | 'failed';
+
+/**
+ * Result of `placeCryptoDeposit`. `secured` → the deposit is collected (`reference` is the tx
+ * hash); `awaiting_payment` → the on-chain transfer couldn't complete (insufficient allowance or
+ * balance in both iFND and FND) — fix per `statusReason` and retry.
+ */
+export interface DepositResult {
+  /** Always 'crypto' on this rail. */
+  provider: 'crypto';
+  /** Deposit status. */
+  status: CryptoDepositStatus;
+  /** Deposit amount in `currency`, as a decimal string. */
+  amount: string;
+  /** Currency code, e.g. "usd". */
+  currency: string;
+  /** On-chain tx hash when secured; empty otherwise. */
+  reference: string;
+  /** Human-readable reason when not secured (e.g. insufficient iFND/FND allowance or balance). */
+  statusReason: string;
 }
 
 /**
@@ -317,5 +402,55 @@ export class EventsAccess {
    */
   async createRoomBooking(payload: CreateRoomBookingRequest): Promise<RoomBooking> {
     return this.sdk.request('events:createRoomBooking', payload);
+  }
+
+  /**
+   * Preflight an event's FND security deposit — returns the spender, network, amount, and the
+   * candidate tokens (iFND first, then FND) with on-chain decimals + base-unit amounts. Read-only;
+   * the event host only. Use it to approve the correct ERC-20 allowance before placing the
+   * deposit; never hardcode the spender or token addresses.
+   *
+   * @param payload.eventId - Event database ID
+   * @returns Preflight data for approving the deposit allowance
+   * @throws {Error} If not authenticated, not the host, or no deposit is required
+   *
+   * @example
+   * ```typescript
+   * // 1. Preflight — discover the spender + candidate tokens (iFND first, then FND)
+   * const { spender, tokens } = await sdk.getEvents().getCryptoDepositPreflight({ eventId: 42 });
+   * const token = tokens[0]; // prefer iFND; fall back to tokens[1] (FND) if the member lacks iFND
+   * // 2. Approve the allowance to the spender (on-chain; the member confirms in the wallet)
+   * await sdk.getWallet().approveERC20(token.address, spender, BigInt(token.baseUnits));
+   * // 3. Place the deposit — the backend transferFroms it into treasury
+   * const result = await sdk.getEvents().placeCryptoDeposit({ eventId: 42 });
+   * ```
+   */
+  async getCryptoDepositPreflight(payload: { eventId: number }): Promise<DepositPreflight> {
+    return this.sdk.request('events:getCryptoDepositPreflight', payload);
+  }
+
+  /**
+   * Place an event's FND security deposit. The backend transferFroms the stablecoin from the
+   * member's own deployed smart account into treasury — the member must have approved the
+   * allowance to the preflight `spender` first (via `getWallet().approveERC20`). Host only; no body.
+   *
+   * @param payload.eventId - Event database ID
+   * @returns The deposit result — `status: 'secured'` (done; `reference` is the tx hash) or
+   *          `'awaiting_payment'` (insufficient iFND/FND allowance or balance — read
+   *          `statusReason`, fix it, and retry)
+   * @throws {Error} If not authenticated, not the host, or the deposit is already resolved
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.getEvents().placeCryptoDeposit({ eventId: 42 });
+   * if (result.status === 'secured') {
+   *   console.log('Deposit secured, tx:', result.reference);
+   * } else if (result.status === 'awaiting_payment') {
+   *   console.warn('Not secured:', result.statusReason); // approve / top up, then retry
+   * }
+   * ```
+   */
+  async placeCryptoDeposit(payload: { eventId: number }): Promise<DepositResult> {
+    return this.sdk.request('events:placeCryptoDeposit', payload);
   }
 }

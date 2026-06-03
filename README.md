@@ -140,6 +140,8 @@ Your app must declare required permissions in the Frontier app registry:
 - `events:listLocations` - List available locations (event spaces and rooms)
 - `events:listRoomBookings` - List room bookings (paginated)
 - `events:createRoomBooking` - Create a room booking
+- `events:getCryptoDepositPreflight` - Preflight an event's FND security deposit (spender, candidate tokens, amounts) before approving the allowance
+- `events:placeCryptoDeposit` - Place an event's FND security deposit (backend transferFrom from the member's smart account)
 
 ### Chain Permissions
 - `chain:getCurrentNetwork` - Get current network name

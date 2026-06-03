@@ -7,6 +7,8 @@ import {
   type ListEventsParams,
   type CreateEventRequest,
   type CreateRoomBookingRequest,
+  type DepositPreflight,
+  type DepositResult,
 } from '../../access/events';
 import type { FrontierSDK } from '../../sdk';
 import type { PaginatedResponse } from '../../access/user';
@@ -186,6 +188,68 @@ describe('EventsAccess', () => {
       await expect(eventsAccess.createRoomBooking({
         startsAt: '', endsAt: '', location: 'room-201',
       })).rejects.toThrow('Booking conflict');
+    });
+  });
+
+  describe('getCryptoDepositPreflight', () => {
+    it('should request the preflight with the eventId payload', async () => {
+      const preflight: DepositPreflight = {
+        spender: '0x1111111111111111111111111111111111111111',
+        network: 'base_sepolia',
+        amount: '400.00',
+        currency: 'usd',
+        tokens: [
+          { key: 'ifnd_token', address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', decimals: 6, baseUnits: '400000000' },
+          { key: 'fnd_token', address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', decimals: 6, baseUnits: '400000000' },
+        ],
+      };
+      vi.mocked(mockSDK.request).mockResolvedValue(preflight);
+
+      const result = await eventsAccess.getCryptoDepositPreflight({ eventId: 42 });
+
+      expect(mockSDK.request).toHaveBeenCalledWith('events:getCryptoDepositPreflight', { eventId: 42 });
+      expect(result.tokens[0].key).toBe('ifnd_token');
+    });
+
+    it('should propagate errors from SDK', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Only the event host can set up the deposit'));
+
+      await expect(eventsAccess.getCryptoDepositPreflight({ eventId: 42 })).rejects.toThrow('Only the event host');
+    });
+  });
+
+  describe('placeCryptoDeposit', () => {
+    it('should request placing the deposit and return secured', async () => {
+      const placed: DepositResult = {
+        provider: 'crypto', status: 'secured', amount: '400.00', currency: 'usd',
+        reference: '0xabc123txhash', statusReason: '',
+      };
+      vi.mocked(mockSDK.request).mockResolvedValue(placed);
+
+      const result = await eventsAccess.placeCryptoDeposit({ eventId: 42 });
+
+      expect(mockSDK.request).toHaveBeenCalledWith('events:placeCryptoDeposit', { eventId: 42 });
+      expect(result.status).toBe('secured');
+      expect(result.reference).toBe('0xabc123txhash');
+    });
+
+    it('should return awaiting_payment with a reason', async () => {
+      const awaiting: DepositResult = {
+        provider: 'crypto', status: 'awaiting_payment', amount: '400.00', currency: 'usd',
+        reference: '', statusReason: 'Insufficient iFND/FND allowance or balance for the deposit.',
+      };
+      vi.mocked(mockSDK.request).mockResolvedValue(awaiting);
+
+      const result = await eventsAccess.placeCryptoDeposit({ eventId: 42 });
+
+      expect(result.status).toBe('awaiting_payment');
+      expect(result.statusReason).toContain('Insufficient');
+    });
+
+    it('should propagate errors from SDK', async () => {
+      vi.mocked(mockSDK.request).mockRejectedValue(new Error('Deposit already secured'));
+
+      await expect(eventsAccess.placeCryptoDeposit({ eventId: 42 })).rejects.toThrow('already secured');
     });
   });
 });
