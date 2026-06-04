@@ -109,6 +109,12 @@ export type {
   RoomBooking,
   ListRoomBookingsParams,
   CreateRoomBookingRequest,
+  DepositStatus,
+  EventDeposit,
+  DepositPreflightToken,
+  DepositPreflight,
+  CryptoDepositStatus,
+  DepositResult,
 } from './access/events';
 
 // Export offices types
