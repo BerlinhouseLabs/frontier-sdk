@@ -792,6 +792,26 @@ describe('WalletAccess', () => {
       expect(mockRequest).toHaveBeenCalledTimes(2);
     });
 
+    it('should handle parallel wallet queries', async () => {
+      const mockBalance = {
+        total: 1000000000000000000n,
+        fnd: 1000000000000000000n,
+        internalFnd: 0n,
+      };
+      mockRequest
+        .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
+        .mockResolvedValueOnce(mockBalance);
+
+      const [address, balance] = await Promise.all([
+        wallet.getAddress(),
+        wallet.getBalance(),
+      ]);
+
+      expect(address).toBe('0x1234567890123456789012345678901234567890');
+      expect(balance).toEqual(mockBalance);
+      expect(mockRequest).toHaveBeenCalledTimes(2);
+    });
+
     it('should handle transaction workflow', async () => {
       const mockBalance = {
         total: 1000000000000000000n,
