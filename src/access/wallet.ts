@@ -513,7 +513,7 @@ export class WalletAccess {
    * Requires biometric authentication and sufficient balance.
    *
    * @param to - Recipient address
-   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
@@ -548,7 +548,7 @@ export class WalletAccess {
    * Requires biometric authentication and sufficient balance.
    *
    * @param to - Recipient address
-   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
@@ -582,7 +582,7 @@ export class WalletAccess {
    * it will use regular Frontier Dollars to complete the transfer.
    *
    * @param to - Recipient address
-   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient total balance or transaction fails

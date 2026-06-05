@@ -488,7 +488,7 @@ describe('WalletAccess', () => {
       });
     });
 
-    it('should handle different amount formats', async () => {
+    it('should accept large whole-unit amounts', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
       const wholeAmount = 100000000000000000000n;
 
@@ -501,7 +501,7 @@ describe('WalletAccess', () => {
       });
     });
 
-    it('should handle small amounts', async () => {
+    it('should pass sub-unit bigint amounts through unchanged', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
       const smallAmount = 10000000000000000n;
 
