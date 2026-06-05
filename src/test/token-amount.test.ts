@@ -49,6 +49,14 @@ describe('parseAmount', () => {
   it('rejects a trailing dot', () => {
     expect(() => parseAmount('75.')).toThrow(InvalidAmountError);
   });
+
+  it('parses a leading-zero fractional value (custom decimals)', () => {
+    expect(parseAmount('0.000001', 6)).toBe(1n);
+  });
+
+  it('parses a negative amount (custom decimals)', () => {
+    expect(parseAmount('-1.5', 6)).toBe(-1500000n);
+  });
 });
 
 describe('formatAmount', () => {
@@ -70,6 +78,14 @@ describe('formatAmount', () => {
 
   it('honors a custom decimals argument', () => {
     expect(formatAmount(1500000n, 6)).toBe('1.5');
+  });
+
+  it('formats a sub-unit amount with leading-zero padding', () => {
+    expect(formatAmount(1n)).toBe('0.000000000000000001');
+  });
+
+  it('formats a negative amount', () => {
+    expect(formatAmount(-1500000n, 6)).toBe('-1.5');
   });
 });
 

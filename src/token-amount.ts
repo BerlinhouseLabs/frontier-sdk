@@ -17,10 +17,10 @@ export class InvalidAmountError extends Error {
  * an amount. Callers normalize locale input (e.g. "," -> ".") before calling.
  */
 export function parseAmount(value: string, decimals: number = FND_DECIMALS): bigint {
-  if (typeof value !== 'string' || !/^-?\d+(\.\d+)?$/.test(value.trim())) {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  if (!trimmed || !/^-?\d+(\.\d+)?$/.test(trimmed)) {
     throw new InvalidAmountError(value);
   }
-  const trimmed = value.trim();
   const negative = trimmed.startsWith('-');
   const unsigned = negative ? trimmed.slice(1) : trimmed;
   const [intPart, fracPart = ''] = unsigned.split('.');
