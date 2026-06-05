@@ -94,7 +94,7 @@ export interface SwapParams {
   sourceNetwork: string;
   /** Network identifier for target chain (e.g., 'ethereum') */
   targetNetwork: string;
-  /** Amount to swap in base units (bigint) */
+  /** Amount to swap in base units, e.g. parseAmount('100.5', 6) */
   amount: bigint;
 }
 
@@ -134,9 +134,9 @@ export interface SwapQuote {
   sourceToken: object;
   /** Target token configuration */
   targetToken: object;
-  /** Expected output amount in base units (bigint) */
+  /** Expected output amount in base units */
   expectedAmountOut: bigint;
-  /** Minimum output amount in base units (bigint) */
+  /** Minimum output amount in base units */
   minAmountOut: bigint;
 }
 

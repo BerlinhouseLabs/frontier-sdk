@@ -716,14 +716,14 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:swap type', async () => {
       mockRequest.mockResolvedValue(mockSwapResult);
 
-      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', 100500000000000000000n);
+      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', 100500000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:swap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: 100500000000000000000n,
+        amount: 100500000n,
       });
       expect(result).toEqual(mockSwapResult);
     });
@@ -735,7 +735,7 @@ describe('WalletAccess', () => {
       };
       mockRequest.mockResolvedValue(submittedResult);
 
-      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', 50000000000000000000n);
+      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', 50000000n);
 
       expect(result.status).toBe(SwapResultStatus.SUBMITTED);
     });
@@ -774,14 +774,14 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:quoteSwap type', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100500000000000000000n);
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100500000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:quoteSwap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: 100500000000000000000n,
+        amount: 100500000n,
       });
       expect(result).toEqual(mockQuote);
     });
@@ -789,7 +789,7 @@ describe('WalletAccess', () => {
     it('should return expected and minimum amounts', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100000000000000000000n);
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100000000n);
 
       expect(result.expectedAmountOut).toBe(95000000000000000000n);
       expect(result.minAmountOut).toBe(94000000000000000000n);
