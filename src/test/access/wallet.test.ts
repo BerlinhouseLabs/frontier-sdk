@@ -62,49 +62,6 @@ describe('WalletAccess', () => {
     });
   });
 
-  describe('getBalanceFormatted', () => {
-    it('should call SDK request with wallet:getBalanceFormatted type', async () => {
-      const mockFormatted = {
-        total: '$15.00',
-        fnd: '$10.00',
-        internalFnd: '$5.00',
-      };
-      mockRequest.mockResolvedValue(mockFormatted);
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(mockRequest).toHaveBeenCalledWith('wallet:getBalanceFormatted');
-      expect(result).toEqual(mockFormatted);
-    });
-
-    it('should handle zero balance formatted', async () => {
-      const zeroFormatted = {
-        total: '$0.00',
-        fnd: '$0.00',
-        internalFnd: '$0.00',
-      };
-      mockRequest.mockResolvedValue(zeroFormatted);
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(result).toEqual(zeroFormatted);
-    });
-
-    it('should handle large formatted balances', async () => {
-      mockRequest.mockResolvedValue('$1000000.00');
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(result).toBe('$1000000.00');
-    });
-
-    it('should propagate errors from SDK', async () => {
-      mockRequest.mockRejectedValue(new Error('No wallet found'));
-
-      await expect(wallet.getBalanceFormatted()).rejects.toThrow('No wallet found');
-    });
-  });
-
   describe('getAddress', () => {
     it('should call SDK request with wallet:getAddress type', async () => {
       const mockAddress = '0x1234567890123456789012345678901234567890';
@@ -833,34 +790,6 @@ describe('WalletAccess', () => {
       expect(address).toBe('0x1234567890123456789012345678901234567890');
       expect(balance).toEqual(mockBalance);
       expect(mockRequest).toHaveBeenCalledTimes(2);
-    });
-
-    it('should handle parallel wallet queries', async () => {
-      const mockBalance = {
-        total: 1000000000000000000n,
-        fnd: 1000000000000000000n,
-        internalFnd: 0n,
-      };
-      const mockFormatted = {
-        total: '$1.00',
-        fnd: '$1.00',
-        internalFnd: '$0.00',
-      };
-      mockRequest
-        .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
-        .mockResolvedValueOnce(mockBalance)
-        .mockResolvedValueOnce(mockFormatted);
-
-      const [address, balance, formatted] = await Promise.all([
-        wallet.getAddress(),
-        wallet.getBalance(),
-        wallet.getBalanceFormatted(),
-      ]);
-
-      expect(address).toBe('0x1234567890123456789012345678901234567890');
-      expect(balance).toEqual(mockBalance);
-      expect(formatted).toEqual(mockFormatted);
-      expect(mockRequest).toHaveBeenCalledTimes(3);
     });
 
     it('should handle transaction workflow', async () => {

@@ -5,7 +5,6 @@ export type { SDKRequest, SDKResponse } from './types';
 // Export wallet types
 export type {
   WalletBalance,
-  WalletBalanceFormatted,
   SmartAccount,
   UserOperationReceipt,
   GasOverrides,

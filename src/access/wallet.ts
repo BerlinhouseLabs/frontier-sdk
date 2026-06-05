@@ -33,18 +33,6 @@ export interface WalletBalance {
 }
 
 /**
- * Formatted wallet balance breakdown
- */
-export interface WalletBalanceFormatted {
-  /** Total balance formatted with currency symbol */
-  total: string;
-  /** Native Frontier Network Dollar balance formatted with currency symbol */
-  fnd: string;
-  /** Internal Frontier Network Dollar balance formatted with currency symbol */
-  internalFnd: string;
-}
-
-/**
  * Transaction receipt from a user operation
  */
 export interface UserOperationReceipt {
@@ -300,25 +288,6 @@ export class WalletAccess {
    */
   async getBalance(): Promise<WalletBalance> {
     return this.sdk.request('wallet:getBalance');
-  }
-
-  /**
-   * Get the current wallet balance formatted for display
-   * 
-   * Returns the balance breakdown as formatted strings
-   * with currency symbol (e.g., { total: '$10.50', ... }).
-   * 
-   * @returns Formatted balance breakdown object
-   * @throws {Error} If no wallet exists
-   * 
-   * @example
-   * ```typescript
-   * const balance = await sdk.getWallet().getBalanceFormatted();
-   * console.log('Total:', balance.total); // '$10.50'
-   * ```
-   */
-  async getBalanceFormatted(): Promise<WalletBalanceFormatted> {
-    return this.sdk.request('wallet:getBalanceFormatted');
   }
 
   /**
