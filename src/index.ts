@@ -23,6 +23,9 @@ export type {
   AccountOwnerType,
 } from './access/wallet';
 
+// Token amount helpers (canonical: bigint base units)
+export { parseAmount, formatAmount, FND_DECIMALS, InvalidAmountError } from './token-amount';
+
 export { SwapResultStatus } from './access/wallet';
 
 // Export chain types
