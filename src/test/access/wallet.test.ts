@@ -62,49 +62,6 @@ describe('WalletAccess', () => {
     });
   });
 
-  describe('getBalanceFormatted', () => {
-    it('should call SDK request with wallet:getBalanceFormatted type', async () => {
-      const mockFormatted = {
-        total: '$15.00',
-        fnd: '$10.00',
-        internalFnd: '$5.00',
-      };
-      mockRequest.mockResolvedValue(mockFormatted);
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(mockRequest).toHaveBeenCalledWith('wallet:getBalanceFormatted');
-      expect(result).toEqual(mockFormatted);
-    });
-
-    it('should handle zero balance formatted', async () => {
-      const zeroFormatted = {
-        total: '$0.00',
-        fnd: '$0.00',
-        internalFnd: '$0.00',
-      };
-      mockRequest.mockResolvedValue(zeroFormatted);
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(result).toEqual(zeroFormatted);
-    });
-
-    it('should handle large formatted balances', async () => {
-      mockRequest.mockResolvedValue('$1000000.00');
-
-      const result = await wallet.getBalanceFormatted();
-
-      expect(result).toBe('$1000000.00');
-    });
-
-    it('should propagate errors from SDK', async () => {
-      mockRequest.mockRejectedValue(new Error('No wallet found'));
-
-      await expect(wallet.getBalanceFormatted()).rejects.toThrow('No wallet found');
-    });
-  });
-
   describe('getAddress', () => {
     it('should call SDK request with wallet:getAddress type', async () => {
       const mockAddress = '0x1234567890123456789012345678901234567890';
@@ -450,8 +407,8 @@ describe('WalletAccess', () => {
 
   describe('transferFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',
@@ -488,9 +445,9 @@ describe('WalletAccess', () => {
       });
     });
 
-    it('should handle different amount formats', async () => {
+    it('should accept large whole-unit amounts', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
-      const wholeAmount = '100';
+      const wholeAmount = 100000000000000000000n;
 
       await wallet.transferFrontierDollar(toAddress, wholeAmount);
 
@@ -501,15 +458,15 @@ describe('WalletAccess', () => {
       });
     });
 
-    it('should handle decimal amounts', async () => {
+    it('should pass sub-unit bigint amounts through unchanged', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
-      const decimalAmount = '0.01';
+      const smallAmount = 10000000000000000n;
 
-      await wallet.transferFrontierDollar(toAddress, decimalAmount);
+      await wallet.transferFrontierDollar(toAddress, smallAmount);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
         to: toAddress,
-        amount: decimalAmount,
+        amount: smallAmount,
         overrides: undefined,
       });
     });
@@ -523,8 +480,8 @@ describe('WalletAccess', () => {
 
   describe('transferInternalFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',
@@ -569,8 +526,8 @@ describe('WalletAccess', () => {
 
   describe('transferOverallFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',
@@ -716,14 +673,14 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:swap type', async () => {
       mockRequest.mockResolvedValue(mockSwapResult);
 
-      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', '100.5');
+      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', 100500000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:swap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: '100.5',
+        amount: 100500000n,
       });
       expect(result).toEqual(mockSwapResult);
     });
@@ -735,7 +692,7 @@ describe('WalletAccess', () => {
       };
       mockRequest.mockResolvedValue(submittedResult);
 
-      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', '50');
+      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', 50000000n);
 
       expect(result.status).toBe(SwapResultStatus.SUBMITTED);
     });
@@ -743,21 +700,21 @@ describe('WalletAccess', () => {
     it('should handle same-chain swaps', async () => {
       mockRequest.mockResolvedValue(mockSwapResult);
 
-      await wallet.swap('USDC', 'WETH', 'base', 'base', '100');
+      await wallet.swap('USDC', 'WETH', 'base', 'base', 100000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:swap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'base',
-        amount: '100',
+        amount: 100000000n,
       });
     });
 
     it('should propagate errors from SDK', async () => {
       mockRequest.mockRejectedValue(new Error('Token not supported'));
 
-      await expect(wallet.swap('INVALID', 'WETH', 'base', 'ethereum', '100')).rejects.toThrow('Token not supported');
+      await expect(wallet.swap('INVALID', 'WETH', 'base', 'ethereum', 100000000n)).rejects.toThrow('Token not supported');
     });
   });
 
@@ -767,21 +724,21 @@ describe('WalletAccess', () => {
       targetChain: { network: 'ethereum' },
       sourceToken: { symbol: 'USDC' },
       targetToken: { symbol: 'WETH' },
-      expectedAmountOut: '0.05',
-      minAmountOut: '0.048',
+      expectedAmountOut: 95000000000000000000n,
+      minAmountOut: 94000000000000000000n,
     };
 
     it('should call SDK request with wallet:quoteSwap type', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', '100.5');
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100500000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:quoteSwap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: '100.5',
+        amount: 100500000n,
       });
       expect(result).toEqual(mockQuote);
     });
@@ -789,30 +746,30 @@ describe('WalletAccess', () => {
     it('should return expected and minimum amounts', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', '100');
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100000000n);
 
-      expect(result.expectedAmountOut).toBe('0.05');
-      expect(result.minAmountOut).toBe('0.048');
+      expect(result.expectedAmountOut).toBe(95000000000000000000n);
+      expect(result.minAmountOut).toBe(94000000000000000000n);
     });
 
     it('should handle same-chain quotes', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      await wallet.quoteSwap('USDC', 'WETH', 'base', 'base', '100');
+      await wallet.quoteSwap('USDC', 'WETH', 'base', 'base', 100000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:quoteSwap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'base',
-        amount: '100',
+        amount: 100000000n,
       });
     });
 
     it('should propagate errors from SDK', async () => {
       mockRequest.mockRejectedValue(new Error('Network not found'));
 
-      await expect(wallet.quoteSwap('USDC', 'WETH', 'invalid', 'ethereum', '100')).rejects.toThrow('Network not found');
+      await expect(wallet.quoteSwap('USDC', 'WETH', 'invalid', 'ethereum', 100000000n)).rejects.toThrow('Network not found');
     });
   });
 
@@ -841,26 +798,18 @@ describe('WalletAccess', () => {
         fnd: 1000000000000000000n,
         internalFnd: 0n,
       };
-      const mockFormatted = {
-        total: '$1.00',
-        fnd: '$1.00',
-        internalFnd: '$0.00',
-      };
       mockRequest
         .mockResolvedValueOnce('0x1234567890123456789012345678901234567890')
-        .mockResolvedValueOnce(mockBalance)
-        .mockResolvedValueOnce(mockFormatted);
+        .mockResolvedValueOnce(mockBalance);
 
-      const [address, balance, formatted] = await Promise.all([
+      const [address, balance] = await Promise.all([
         wallet.getAddress(),
         wallet.getBalance(),
-        wallet.getBalanceFormatted(),
       ]);
 
       expect(address).toBe('0x1234567890123456789012345678901234567890');
       expect(balance).toEqual(mockBalance);
-      expect(formatted).toEqual(mockFormatted);
-      expect(mockRequest).toHaveBeenCalledTimes(3);
+      expect(mockRequest).toHaveBeenCalledTimes(2);
     });
 
     it('should handle transaction workflow', async () => {

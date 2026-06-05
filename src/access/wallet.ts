@@ -33,18 +33,6 @@ export interface WalletBalance {
 }
 
 /**
- * Formatted wallet balance breakdown
- */
-export interface WalletBalanceFormatted {
-  /** Total balance formatted with currency symbol */
-  total: string;
-  /** Native Frontier Network Dollar balance formatted with currency symbol */
-  fnd: string;
-  /** Internal Frontier Network Dollar balance formatted with currency symbol */
-  internalFnd: string;
-}
-
-/**
  * Transaction receipt from a user operation
  */
 export interface UserOperationReceipt {
@@ -94,8 +82,8 @@ export interface SwapParams {
   sourceNetwork: string;
   /** Network identifier for target chain (e.g., 'ethereum') */
   targetNetwork: string;
-  /** Amount to swap in human-readable format (e.g., '100.5') */
-  amount: string;
+  /** Amount to swap in base units, e.g. parseAmount('100.5', 6) */
+  amount: bigint;
 }
 
 /**
@@ -134,10 +122,10 @@ export interface SwapQuote {
   sourceToken: object;
   /** Target token configuration */
   targetToken: object;
-  /** Expected output amount in human-readable format */
-  expectedAmountOut: string;
-  /** Minimum output amount in human-readable format */
-  minAmountOut: string;
+  /** Expected output amount in base units */
+  expectedAmountOut: bigint;
+  /** Minimum output amount in base units */
+  minAmountOut: bigint;
 }
 
 /**
@@ -300,25 +288,6 @@ export class WalletAccess {
    */
   async getBalance(): Promise<WalletBalance> {
     return this.sdk.request('wallet:getBalance');
-  }
-
-  /**
-   * Get the current wallet balance formatted for display
-   * 
-   * Returns the balance breakdown as formatted strings
-   * with currency symbol (e.g., { total: '$10.50', ... }).
-   * 
-   * @returns Formatted balance breakdown object
-   * @throws {Error} If no wallet exists
-   * 
-   * @example
-   * ```typescript
-   * const balance = await sdk.getWallet().getBalanceFormatted();
-   * console.log('Total:', balance.total); // '$10.50'
-   * ```
-   */
-  async getBalanceFormatted(): Promise<WalletBalanceFormatted> {
-    return this.sdk.request('wallet:getBalanceFormatted');
   }
 
   /**
@@ -508,28 +477,30 @@ export class WalletAccess {
 
   /**
    * Transfer Frontier Dollars to another address
-   * 
+   *
    * Sends Frontier Dollars (the native stablecoin) to a recipient address.
    * Requires biometric authentication and sufficient balance.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5' // 10.5 Frontier Dollars
+   *   parseAmount('10.5') // 10.5 Frontier Dollars in base units
    * );
    * console.log('Transaction:', receipt.transactionHash);
    * ```
    */
   async transferFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferFrontierDollar', {
@@ -541,27 +512,29 @@ export class WalletAccess {
 
   /**
    * Transfer Internal Frontier Dollars to another address
-   * 
+   *
    * Sends Internal Frontier Dollars (for Network Society spending) to a recipient address.
    * Requires biometric authentication and sufficient balance.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferInternalFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5' // 10.5 Internal Frontier Dollars
+   *   parseAmount('10.5') // 10.5 Internal Frontier Dollars in base units
    * );
    * ```
    */
   async transferInternalFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferInternalFrontierDollar', {
@@ -573,27 +546,29 @@ export class WalletAccess {
 
   /**
    * Transfer Frontier Dollars with Internal Frontier Network Dollars (iFND) preferred
-   * 
+   *
    * This method will use Internal Frontier Dollars first, and if insufficient,
    * it will use regular Frontier Dollars to complete the transfer.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5')
+   * @param amount - Amount to send in base units, e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient total balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferOverallFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5'
+   *   parseAmount('10.5')
    * );
    * ```
    */
   async transferOverallFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferOverallFrontierDollar', {
@@ -667,18 +642,20 @@ export class WalletAccess {
    * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
    * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
    * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
-   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
+   * @param amount - Amount to swap in base units, e.g. parseAmount('100.5', 6)
    * @returns Swap result with status and transaction details
    * @throws {Error} If swap fails or tokens/networks are not supported
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const result = await sdk.getWallet().swap(
    *   'USDC',
    *   'WETH',
    *   'base',
    *   'ethereum',
-   *   '100.5'
+   *   parseAmount('100.5', 6) // 100.5 USDC in base units
    * );
    * console.log('Swap status:', result.status);
    * ```
@@ -688,7 +665,7 @@ export class WalletAccess {
     targetToken: string,
     sourceNetwork: string,
     targetNetwork: string,
-    amount: string
+    amount: bigint
   ): Promise<SwapResult> {
     return this.sdk.request('wallet:swap', {
       sourceToken,
@@ -701,29 +678,32 @@ export class WalletAccess {
 
   /**
    * Get a quote for a token swap without executing it
-   * 
+   *
    * Returns the expected output amount for a given swap.
    * Useful for displaying swap previews to users before confirmation.
-   * 
+   *
    * @param sourceToken - Symbol of the token to swap from (e.g., 'USDC')
    * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
    * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
    * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
-   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
-   * @returns Quote with expected and minimum output amounts
+   * @param amount - Amount to swap in base units, e.g. parseAmount('100.5', 6)
+   * @returns Quote with expected and minimum output amounts in base units
    * @throws {Error} If tokens/networks are not supported
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount, formatAmount } from '@frontiertower/frontier-sdk';
+   *
    * const quote = await sdk.getWallet().quoteSwap(
    *   'USDC',
    *   'WETH',
    *   'base',
    *   'ethereum',
-   *   '100.5'
+   *   parseAmount('100.5', 6) // 100.5 USDC in base units
    * );
-   * console.log('Expected output:', quote.expectedAmountOut);
-   * console.log('Minimum output:', quote.minAmountOut);
+   * // quote.expectedAmountOut and quote.minAmountOut are bigint base units
+   * console.log('Expected output:', formatAmount(quote.expectedAmountOut, 18)); // e.g. '0.05'
+   * console.log('Minimum output:', formatAmount(quote.minAmountOut, 18));
    * ```
    */
   async quoteSwap(
@@ -731,7 +711,7 @@ export class WalletAccess {
     targetToken: string,
     sourceNetwork: string,
     targetNetwork: string,
-    amount: string
+    amount: bigint
   ): Promise<SwapQuote> {
     return this.sdk.request('wallet:quoteSwap', {
       sourceToken,

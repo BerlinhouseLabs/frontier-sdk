@@ -5,7 +5,6 @@ export type { SDKRequest, SDKResponse } from './types';
 // Export wallet types
 export type {
   WalletBalance,
-  WalletBalanceFormatted,
   SmartAccount,
   UserOperationReceipt,
   GasOverrides,
@@ -22,6 +21,9 @@ export type {
   BillingAddress,
   AccountOwnerType,
 } from './access/wallet';
+
+// Token amount helpers (canonical: bigint base units)
+export { parseAmount, formatAmount, FND_DECIMALS, InvalidAmountError } from './token-amount';
 
 export { SwapResultStatus } from './access/wallet';
 
