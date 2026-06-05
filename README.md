@@ -15,7 +15,7 @@ npm install @frontiertower/frontier-sdk
 ## Quick Start
 
 ```typescript
-import { FrontierSDK } from '@frontiertower/frontier-sdk';
+import { FrontierSDK, parseAmount, formatAmount } from '@frontiertower/frontier-sdk';
 import { isInFrontierApp, renderStandaloneMessage } from '@frontiertower/frontier-sdk/ui-utils';
 
 // Initialize the SDK
@@ -33,10 +33,17 @@ if (!isInFrontierApp()) {
  * - Frontier Network Dollar (FND): Freely convertible to fiat currency.
  * - Internal Frontier Network Dollar (iFND): Only convertible by Frontier Tower representatives;
  *   designed for circulation within the Network Society.
+ *
+ * Balance fields (total, fnd, internalFnd) are bigint values in base units.
+ * Use formatAmount() to produce a human-readable string for display.
  */
-const balance = await sdk.getWallet().getBalance();
-console.log('Total FND:', balance.total.toString());
+const { fnd, total } = await sdk.getWallet().getBalance();
+console.log(`FND balance: $${formatAmount(fnd)}`);   // e.g. "$75.5"
+console.log(`Total balance: $${formatAmount(total)}`);
 const address = await sdk.getWallet().getAddress();
+
+// Transfer 10.5 FND — amounts are bigint base units; use parseAmount() to convert
+await sdk.getWallet().transferFrontierDollar('0xRecipientAddress', parseAmount('10.5'));
 
 // Use persistent storage
 await sdk.getStorage().set('myKey', { value: 'myData' });
@@ -50,7 +57,6 @@ Your app must declare required permissions in the Frontier app registry:
 
 ### Wallet Permissions
 - `wallet:getBalance` - Access wallet balance
-- `wallet:getBalanceFormatted` - Access formatted wallet balance
 - `wallet:getAddress` - Access wallet address
 - `wallet:getSmartAccount` - Access smart account details
 - `wallet:transferERC20` - Transfer ERC20 tokens
