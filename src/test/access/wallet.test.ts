@@ -450,8 +450,8 @@ describe('WalletAccess', () => {
 
   describe('transferFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',
@@ -490,7 +490,7 @@ describe('WalletAccess', () => {
 
     it('should handle different amount formats', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
-      const wholeAmount = '100';
+      const wholeAmount = 100000000000000000000n;
 
       await wallet.transferFrontierDollar(toAddress, wholeAmount);
 
@@ -501,15 +501,15 @@ describe('WalletAccess', () => {
       });
     });
 
-    it('should handle decimal amounts', async () => {
+    it('should handle small amounts', async () => {
       mockRequest.mockResolvedValue(mockReceipt);
-      const decimalAmount = '0.01';
+      const smallAmount = 10000000000000000n;
 
-      await wallet.transferFrontierDollar(toAddress, decimalAmount);
+      await wallet.transferFrontierDollar(toAddress, smallAmount);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:transferFrontierDollar', {
         to: toAddress,
-        amount: decimalAmount,
+        amount: smallAmount,
         overrides: undefined,
       });
     });
@@ -523,8 +523,8 @@ describe('WalletAccess', () => {
 
   describe('transferInternalFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',
@@ -569,8 +569,8 @@ describe('WalletAccess', () => {
 
   describe('transferOverallFrontierDollar', () => {
     const toAddress = '0x2222222222222222222222222222222222222222';
-    const amount = '10.5';
-    
+    const amount = 10500000000000000000n;
+
     const mockReceipt: UserOperationReceipt = {
       userOpHash: '0xhash',
       transactionHash: '0xtxhash',

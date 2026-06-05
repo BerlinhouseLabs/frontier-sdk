@@ -508,28 +508,30 @@ export class WalletAccess {
 
   /**
    * Transfer Frontier Dollars to another address
-   * 
+   *
    * Sends Frontier Dollars (the native stablecoin) to a recipient address.
    * Requires biometric authentication and sufficient balance.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5' // 10.5 Frontier Dollars
+   *   parseAmount('10.5') // 10.5 Frontier Dollars in base units
    * );
    * console.log('Transaction:', receipt.transactionHash);
    * ```
    */
   async transferFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferFrontierDollar', {
@@ -541,27 +543,29 @@ export class WalletAccess {
 
   /**
    * Transfer Internal Frontier Dollars to another address
-   * 
+   *
    * Sends Internal Frontier Dollars (for Network Society spending) to a recipient address.
    * Requires biometric authentication and sufficient balance.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5' for 10.5 Frontier Dollars)
+   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferInternalFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5' // 10.5 Internal Frontier Dollars
+   *   parseAmount('10.5') // 10.5 Internal Frontier Dollars in base units
    * );
    * ```
    */
   async transferInternalFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferInternalFrontierDollar', {
@@ -573,27 +577,29 @@ export class WalletAccess {
 
   /**
    * Transfer Frontier Dollars with Internal Frontier Network Dollars (iFND) preferred
-   * 
+   *
    * This method will use Internal Frontier Dollars first, and if insufficient,
    * it will use regular Frontier Dollars to complete the transfer.
-   * 
+   *
    * @param to - Recipient address
-   * @param amount - Amount to send (as string, e.g., '10.5')
+   * @param amount - Amount to send in base units (bigint), e.g. parseAmount('10.5')
    * @param overrides - Optional gas overrides
    * @returns User operation receipt with transaction details
    * @throws {Error} If insufficient total balance or transaction fails
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const receipt = await sdk.getWallet().transferOverallFrontierDollar(
    *   '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-   *   '10.5'
+   *   parseAmount('10.5')
    * );
    * ```
    */
   async transferOverallFrontierDollar(
     to: string,
-    amount: string,
+    amount: bigint,
     overrides?: GasOverrides
   ): Promise<UserOperationReceipt> {
     return this.sdk.request('wallet:transferOverallFrontierDollar', {
