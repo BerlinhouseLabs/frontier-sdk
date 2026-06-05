@@ -94,8 +94,8 @@ export interface SwapParams {
   sourceNetwork: string;
   /** Network identifier for target chain (e.g., 'ethereum') */
   targetNetwork: string;
-  /** Amount to swap in human-readable format (e.g., '100.5') */
-  amount: string;
+  /** Amount to swap in base units (bigint) */
+  amount: bigint;
 }
 
 /**
@@ -134,10 +134,10 @@ export interface SwapQuote {
   sourceToken: object;
   /** Target token configuration */
   targetToken: object;
-  /** Expected output amount in human-readable format */
-  expectedAmountOut: string;
-  /** Minimum output amount in human-readable format */
-  minAmountOut: string;
+  /** Expected output amount in base units (bigint) */
+  expectedAmountOut: bigint;
+  /** Minimum output amount in base units (bigint) */
+  minAmountOut: bigint;
 }
 
 /**
@@ -673,18 +673,20 @@ export class WalletAccess {
    * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
    * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
    * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
-   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
+   * @param amount - Amount to swap in base units, e.g. parseAmount('100.5', 6)
    * @returns Swap result with status and transaction details
    * @throws {Error} If swap fails or tokens/networks are not supported
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount } from '@frontiertower/frontier-sdk';
+   *
    * const result = await sdk.getWallet().swap(
    *   'USDC',
    *   'WETH',
    *   'base',
    *   'ethereum',
-   *   '100.5'
+   *   parseAmount('100.5', 6) // 100.5 USDC in base units
    * );
    * console.log('Swap status:', result.status);
    * ```
@@ -694,7 +696,7 @@ export class WalletAccess {
     targetToken: string,
     sourceNetwork: string,
     targetNetwork: string,
-    amount: string
+    amount: bigint
   ): Promise<SwapResult> {
     return this.sdk.request('wallet:swap', {
       sourceToken,
@@ -707,29 +709,32 @@ export class WalletAccess {
 
   /**
    * Get a quote for a token swap without executing it
-   * 
+   *
    * Returns the expected output amount for a given swap.
    * Useful for displaying swap previews to users before confirmation.
-   * 
+   *
    * @param sourceToken - Symbol of the token to swap from (e.g., 'USDC')
    * @param targetToken - Symbol of the token to swap to (e.g., 'WETH')
    * @param sourceNetwork - Network identifier for source chain (e.g., 'base')
    * @param targetNetwork - Network identifier for target chain (e.g., 'ethereum')
-   * @param amount - Amount to swap in human-readable format (e.g., '100.5')
-   * @returns Quote with expected and minimum output amounts
+   * @param amount - Amount to swap in base units, e.g. parseAmount('100.5', 6)
+   * @returns Quote with expected and minimum output amounts in base units
    * @throws {Error} If tokens/networks are not supported
-   * 
+   *
    * @example
    * ```typescript
+   * import { parseAmount, formatAmount } from '@frontiertower/frontier-sdk';
+   *
    * const quote = await sdk.getWallet().quoteSwap(
    *   'USDC',
    *   'WETH',
    *   'base',
    *   'ethereum',
-   *   '100.5'
+   *   parseAmount('100.5', 6) // 100.5 USDC in base units
    * );
-   * console.log('Expected output:', quote.expectedAmountOut);
-   * console.log('Minimum output:', quote.minAmountOut);
+   * // quote.expectedAmountOut and quote.minAmountOut are bigint base units
+   * console.log('Expected output:', formatAmount(quote.expectedAmountOut, 18)); // e.g. '0.05'
+   * console.log('Minimum output:', formatAmount(quote.minAmountOut, 18));
    * ```
    */
   async quoteSwap(
@@ -737,7 +742,7 @@ export class WalletAccess {
     targetToken: string,
     sourceNetwork: string,
     targetNetwork: string,
-    amount: string
+    amount: bigint
   ): Promise<SwapQuote> {
     return this.sdk.request('wallet:quoteSwap', {
       sourceToken,

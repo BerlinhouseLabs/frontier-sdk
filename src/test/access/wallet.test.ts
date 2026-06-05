@@ -716,14 +716,14 @@ describe('WalletAccess', () => {
     it('should call SDK request with wallet:swap type', async () => {
       mockRequest.mockResolvedValue(mockSwapResult);
 
-      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', '100.5');
+      const result = await wallet.swap('USDC', 'WETH', 'base', 'ethereum', 100500000000000000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:swap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: '100.5',
+        amount: 100500000000000000000n,
       });
       expect(result).toEqual(mockSwapResult);
     });
@@ -735,7 +735,7 @@ describe('WalletAccess', () => {
       };
       mockRequest.mockResolvedValue(submittedResult);
 
-      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', '50');
+      const result = await wallet.swap('USDC', 'FND', 'base', 'ethereum', 50000000000000000000n);
 
       expect(result.status).toBe(SwapResultStatus.SUBMITTED);
     });
@@ -743,21 +743,21 @@ describe('WalletAccess', () => {
     it('should handle same-chain swaps', async () => {
       mockRequest.mockResolvedValue(mockSwapResult);
 
-      await wallet.swap('USDC', 'WETH', 'base', 'base', '100');
+      await wallet.swap('USDC', 'WETH', 'base', 'base', 100000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:swap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'base',
-        amount: '100',
+        amount: 100000000n,
       });
     });
 
     it('should propagate errors from SDK', async () => {
       mockRequest.mockRejectedValue(new Error('Token not supported'));
 
-      await expect(wallet.swap('INVALID', 'WETH', 'base', 'ethereum', '100')).rejects.toThrow('Token not supported');
+      await expect(wallet.swap('INVALID', 'WETH', 'base', 'ethereum', 100000000n)).rejects.toThrow('Token not supported');
     });
   });
 
@@ -767,21 +767,21 @@ describe('WalletAccess', () => {
       targetChain: { network: 'ethereum' },
       sourceToken: { symbol: 'USDC' },
       targetToken: { symbol: 'WETH' },
-      expectedAmountOut: '0.05',
-      minAmountOut: '0.048',
+      expectedAmountOut: 95000000000000000000n,
+      minAmountOut: 94000000000000000000n,
     };
 
     it('should call SDK request with wallet:quoteSwap type', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', '100.5');
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100500000000000000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:quoteSwap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'ethereum',
-        amount: '100.5',
+        amount: 100500000000000000000n,
       });
       expect(result).toEqual(mockQuote);
     });
@@ -789,30 +789,30 @@ describe('WalletAccess', () => {
     it('should return expected and minimum amounts', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', '100');
+      const result = await wallet.quoteSwap('USDC', 'WETH', 'base', 'ethereum', 100000000000000000000n);
 
-      expect(result.expectedAmountOut).toBe('0.05');
-      expect(result.minAmountOut).toBe('0.048');
+      expect(result.expectedAmountOut).toBe(95000000000000000000n);
+      expect(result.minAmountOut).toBe(94000000000000000000n);
     });
 
     it('should handle same-chain quotes', async () => {
       mockRequest.mockResolvedValue(mockQuote);
 
-      await wallet.quoteSwap('USDC', 'WETH', 'base', 'base', '100');
+      await wallet.quoteSwap('USDC', 'WETH', 'base', 'base', 100000000n);
 
       expect(mockRequest).toHaveBeenCalledWith('wallet:quoteSwap', {
         sourceToken: 'USDC',
         targetToken: 'WETH',
         sourceNetwork: 'base',
         targetNetwork: 'base',
-        amount: '100',
+        amount: 100000000n,
       });
     });
 
     it('should propagate errors from SDK', async () => {
       mockRequest.mockRejectedValue(new Error('Network not found'));
 
-      await expect(wallet.quoteSwap('USDC', 'WETH', 'invalid', 'ethereum', '100')).rejects.toThrow('Network not found');
+      await expect(wallet.quoteSwap('USDC', 'WETH', 'invalid', 'ethereum', 100000000n)).rejects.toThrow('Network not found');
     });
   });
 
