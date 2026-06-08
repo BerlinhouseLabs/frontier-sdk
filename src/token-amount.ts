@@ -1,5 +1,5 @@
 /** Decimals for the Frontier Dollar (FND) token. */
-export const FND_DECIMALS = 18;
+export const FND_DECIMALS = 6;
 
 /** Thrown when a string cannot be parsed as a plain base-10 token amount. */
 export class InvalidAmountError extends Error {

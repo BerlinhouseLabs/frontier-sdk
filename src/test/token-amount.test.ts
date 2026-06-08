@@ -2,18 +2,18 @@ import { describe, it, expect } from 'vitest';
 import { parseAmount, formatAmount, FND_DECIMALS, InvalidAmountError } from '../token-amount';
 
 describe('FND_DECIMALS', () => {
-  it('is 18', () => {
-    expect(FND_DECIMALS).toBe(18);
+  it('is 6', () => {
+    expect(FND_DECIMALS).toBe(6);
   });
 });
 
 describe('parseAmount', () => {
   it('parses a decimal string to base units (default FND decimals)', () => {
-    expect(parseAmount('75.5')).toBe(75500000000000000000n);
+    expect(parseAmount('75.5')).toBe(75500000n);
   });
 
   it('parses an integer string', () => {
-    expect(parseAmount('75')).toBe(75000000000000000000n);
+    expect(parseAmount('75')).toBe(75000000n);
   });
 
   it('parses zero', () => {
@@ -24,10 +24,8 @@ describe('parseAmount', () => {
     expect(parseAmount('1.5', 6)).toBe(1500000n);
   });
 
-  it('preserves full 18-dp precision without float loss', () => {
-    expect(parseAmount('123456789.123456789012345678')).toBe(
-      123456789123456789012345678n,
-    );
+  it('preserves full 6-dp precision without float loss', () => {
+    expect(parseAmount('123456789.123456')).toBe(123456789123456n);
   });
 
   it('rejects a currency symbol', () => {
@@ -43,7 +41,7 @@ describe('parseAmount', () => {
   });
 
   it('rejects more fractional digits than the token supports', () => {
-    expect(() => parseAmount('1.0000000000000000001')).toThrow(InvalidAmountError);
+    expect(() => parseAmount('1.0000001')).toThrow(InvalidAmountError);
   });
 
   it('rejects a trailing dot', () => {
@@ -61,11 +59,11 @@ describe('parseAmount', () => {
 
 describe('formatAmount', () => {
   it('formats base units to an exact decimal string', () => {
-    expect(formatAmount(75500000000000000000n)).toBe('75.5');
+    expect(formatAmount(75500000n)).toBe('75.5');
   });
 
   it('drops the fractional part when zero', () => {
-    expect(formatAmount(75000000000000000000n)).toBe('75');
+    expect(formatAmount(75000000n)).toBe('75');
   });
 
   it('formats zero', () => {
@@ -73,7 +71,7 @@ describe('formatAmount', () => {
   });
 
   it('trims trailing zeros', () => {
-    expect(formatAmount(75100000000000000000n)).toBe('75.1');
+    expect(formatAmount(75100000n)).toBe('75.1');
   });
 
   it('honors a custom decimals argument', () => {
@@ -81,7 +79,7 @@ describe('formatAmount', () => {
   });
 
   it('formats a sub-unit amount with leading-zero padding', () => {
-    expect(formatAmount(1n)).toBe('0.000000000000000001');
+    expect(formatAmount(1n)).toBe('0.000001');
   });
 
   it('formats a negative amount', () => {
@@ -91,7 +89,7 @@ describe('formatAmount', () => {
 
 describe('round-trip', () => {
   it('parseAmount(formatAmount(x)) === x', () => {
-    for (const x of [0n, 1n, 75500000000000000000n, 123456789123456789012345678n]) {
+    for (const x of [0n, 1n, 75500000n, 123456789123456n]) {
       expect(parseAmount(formatAmount(x))).toBe(x);
     }
   });
