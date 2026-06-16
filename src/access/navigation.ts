@@ -48,6 +48,15 @@ export class NavigationAccess {
   }
 
   /**
+   * Ask the host app to open an external URL.
+   * Requires permission: navigation:openExternalUrl or navigation:*
+   * @param url - External URL to open from the host context
+   */
+  async openExternalUrl(url: string): Promise<void> {
+    return this.sdk.request('navigation:openExternalUrl', { url });
+  }
+
+  /**
    * Close the current app and return to the previous screen
    * Requires permission: navigation:close or navigation:*
    */
