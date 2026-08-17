@@ -2,7 +2,15 @@ import type { FrontierSDK } from '../sdk';
 import type { PaginatedResponse } from './user';
 
 /** Event visibility type */
-export type EventType = 'public' | 'members_plus_one' | 'members_only' | 'community_only';
+// `public` is legacy — no longer creatable, retained so events created before the
+// authorization rewrite still deserialize.
+export type EventType =
+  | 'members_only'
+  | 'community_only'
+  | 'members_plus_one'
+  | 'members_plus_three'
+  | 'citizens_free_paid'
+  | 'public';
 
 /** External event service */
 export type EventService = 'luma' | 'private' | 'test';
