@@ -1,4 +1,13 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
+
+# Logs
 *.log
-.DS_Store
+
+# Claude Code (local only)
+.claude/settings.local.json
+.claude/worktrees/
+.claude/launch.json

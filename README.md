@@ -1,6 +1,12 @@
 # Frontier Wallet SDK
 
-Official SDK for building apps on Frontier Wallet.
+[![npm version](https://img.shields.io/npm/v/@frontiertower/frontier-sdk.svg)](https://www.npmjs.com/package/@frontiertower/frontier-sdk)
+[![CI main](https://github.com/BerlinhouseLabs/frontier-sdk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BerlinhouseLabs/frontier-sdk/actions/workflows/ci.yml)
+[![CI staging](https://github.com/BerlinhouseLabs/frontier-sdk/actions/workflows/ci.yml/badge.svg?branch=staging)](https://github.com/BerlinhouseLabs/frontier-sdk/actions/workflows/ci.yml)
+
+The official TypeScript SDK for building apps on the Frontier Wallet inside [Frontier OS](https://os.frontiertower.io), the app platform of Frontier Tower. Your app runs in an iframe inside the wallet; the SDK handles the `postMessage` protocol so you can read balances, send payments, store data, book rooms and more with plain async calls.
+
+[frontier-os-app-builder](https://github.com/BerlinhouseLabs/frontier-os-app-builder) scaffolds new apps on top of it with Claude Code, and [frontier-kickstarter](https://github.com/BerlinhouseLabs/frontier-kickstarter) is a minimal example app.
 
 ## Example Project
 
@@ -254,45 +260,30 @@ The SDK verifies that apps are running in legitimate Frontier Wallet instances. 
 
 ## Development
 
-```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Build the SDK
-npm run build
-
-# Watch mode for development
-npm run dev
-```
-
-### Publishing to npm
-
-The package is published to npm as `@frontiertower/frontier-sdk`.
+Node 22 (see `.nvmrc`).
 
 ```bash
-# 1. Log in to npm (one-time setup)
-npm login
-
-# 2. Bump the version (patch/minor/major)
-npm version patch  # e.g. 0.15.0 → 0.15.1
-
-# 3. Build and publish (prepublishOnly runs build automatically)
-npm publish --access public
+npm ci            # install from the lockfile
+npm test          # vitest
+npm run build     # tsup: CJS + ESM + type declarations into dist/
+npm run dev       # watch mode
 ```
 
-> **Note:** `npm publish` automatically runs `npm run build` via the `prepublishOnly` script before publishing.
+## Releases and rollback
 
-## Contributing
+The package is published to npm as `@frontiertower/frontier-sdk` by hand; merging to `staging` or `main` does not publish. Bump the version, then run `./release.sh`, which runs the tests, logs in to npm and publishes (`prepublishOnly` builds first).
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+npm version patch   # or minor / major
+./release.sh
+```
+
+To roll back a bad release, publish a fixed patch version and mark the bad one with `npm deprecate @frontiertower/frontier-sdk@<bad-version> "use <fixed-version>"`. Apps pin an exact version, so they pick the fix up when they bump.
+
+## Where it fits
+
+The SDK talks to the Frontier Wallet host (the PWA at os.frontiertower.io) over `postMessage`; the host calls the Frontier API on its behalf. See [the org repo index](https://github.com/BerlinhouseLabs/berlinhouse-labs/blob/staging/index/repos.md) for the other repos.
 
 ## License
 
-MIT © Frontier Tower
-
-## Support
-
-For questions and support, please visit [Frontier Tower](https://frontiertower.io) or open an issue on GitHub.
+MIT, see [LICENSE](./LICENSE). Questions: open an issue or visit [frontiertower.io](https://frontiertower.io).
