@@ -1,7 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WalletAccess } from '../../access/wallet';
 import type { FrontierSDK } from '../../sdk';
-import type { SmartAccount, UserOperationReceipt, GasOverrides, ExecuteCall, SwapResult, SwapQuote } from '../../access/wallet';
+import type {
+  SmartAccount,
+  UserOperationReceipt,
+  GasOverrides,
+  ExecuteCall,
+  SwapResult,
+  SwapQuote,
+  OnRampResponse,
+  EurDepositInstructions,
+  LinkedBanksResponse,
+} from '../../access/wallet';
 import { SwapResultStatus } from '../../access/wallet';
 
 describe('WalletAccess', () => {
@@ -904,16 +914,16 @@ describe('WalletAccess', () => {
   });
 
   describe('getEurDepositInstructions', () => {
-    const mockEurResponse = {
-      currency: 'eur' as const,
+    const mockEurResponse: OnRampResponse<EurDepositInstructions> = {
+      currency: 'eur',
       depositInstructions: {
-        currency: 'eur' as const,
+        currency: 'eur',
         iban: 'DE89370400440532013000',
         bic: 'COBADEFFXXX',
-        bankName: 'Commerzbank',
-        beneficiaryName: 'Frontier User',
+        accountHolderName: 'Frontier User',
       },
       destinationAddress: '0x1234567890123456789012345678901234567890',
+      destinationNetwork: 'base',
     };
 
     it('should call SDK request with wallet:getEurDepositInstructions type', async () => {
@@ -933,8 +943,7 @@ describe('WalletAccess', () => {
       expect(result.currency).toBe('eur');
       expect(result.depositInstructions.iban).toBe('DE89370400440532013000');
       expect(result.depositInstructions.bic).toBe('COBADEFFXXX');
-      expect(result.depositInstructions.bankName).toBe('Commerzbank');
-      expect(result.depositInstructions.beneficiaryName).toBe('Frontier User');
+      expect(result.depositInstructions.accountHolderName).toBe('Frontier User');
       expect(result.destinationAddress).toBe('0x1234567890123456789012345678901234567890');
     });
 
@@ -945,7 +954,7 @@ describe('WalletAccess', () => {
           ...mockEurResponse.depositInstructions,
           iban: 'FR7630006000011234567890189',
           bic: 'BNPAFRPP',
-          bankName: 'BNP Paribas',
+          accountHolderName: 'Utilisateur Frontier',
         },
       };
       mockRequest.mockResolvedValue(frenchResponse);
@@ -964,21 +973,21 @@ describe('WalletAccess', () => {
   });
 
   describe('getLinkedBanks', () => {
-    const mockLinkedBanksResponse = {
+    const mockLinkedBanksResponse: LinkedBanksResponse = {
       banks: [
         {
           id: 'ea_abc123',
           bankName: 'Chase',
           last4: '1111',
           withdrawalAddress: '0x1234567890abcdef',
-          chain: 'base',
+          network: 'base',
         },
         {
           id: 'ea_def456',
           bankName: 'Deutsche Bank',
           last4: '3000',
           withdrawalAddress: '0xabcdef1234567890',
-          chain: 'base',
+          network: 'base',
         },
       ],
     };
@@ -1009,7 +1018,7 @@ describe('WalletAccess', () => {
       expect(result.banks[0].bankName).toBe('Chase');
       expect(result.banks[0].last4).toBe('1111');
       expect(result.banks[0].withdrawalAddress).toBe('0x1234567890abcdef');
-      expect(result.banks[0].chain).toBe('base');
+      expect(result.banks[0].network).toBe('base');
     });
 
     it('should propagate errors from SDK', async () => {
