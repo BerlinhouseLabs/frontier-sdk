@@ -26,11 +26,13 @@ describe('UserAccess', () => {
   describe('getDetails', () => {
     it('should request current user details', async () => {
       const mockUser: User = {
-        id: '123',
+        id: 123,
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
-        username: 'testuser',
+        isActive: true,
+        dateJoined: '2024-01-01T00:00:00Z',
+        isSuperuser: false,
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockUser);
@@ -41,37 +43,45 @@ describe('UserAccess', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('should return user with required fields', async () => {
+    it('should return user with all fields', async () => {
       const mockUser: User = {
-        id: '456',
+        id: 456,
         email: 'john@example.com',
+        firstName: 'John',
+        lastName: 'Smith',
+        isActive: true,
+        dateJoined: '2024-02-01T00:00:00Z',
+        isSuperuser: false,
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockUser);
 
       const result = await userAccess.getDetails();
 
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('email');
-      expect(result.id).toBe('456');
+      expect(result.id).toBe(456);
       expect(result.email).toBe('john@example.com');
+      expect(result.firstName).toBe('John');
+      expect(result.lastName).toBe('Smith');
+      expect(result.dateJoined).toBe('2024-02-01T00:00:00Z');
     });
 
-    it('should handle optional fields', async () => {
+    it('should pass through account status flags', async () => {
       const mockUser: User = {
-        id: '789',
+        id: 789,
         email: 'jane@example.com',
         firstName: 'Jane',
         lastName: 'Doe',
+        isActive: false,
+        dateJoined: '2024-03-01T00:00:00Z',
+        isSuperuser: true,
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockUser);
 
       const result = await userAccess.getDetails();
 
-      expect(result.firstName).toBe('Jane');
-      expect(result.lastName).toBe('Doe');
-      expect(result.username).toBeUndefined();
+      expect(result.isActive).toBe(false);
+      expect(result.isSuperuser).toBe(true);
     });
 
     it('should throw error if not authenticated', async () => {
@@ -183,9 +193,11 @@ describe('UserAccess', () => {
   describe('getReferralOverview', () => {
     it('should request referral overview for current user', async () => {
       const mockOverview: ReferralOverview = {
-        totalReferrals: 10,
-        activeReferrals: 7,
-        totalRewards: 500,
+        referralCount: 10,
+        ranking: 3,
+        referralLink: 'https://frontiertower.io/r/TEST10',
+        referralCode: 'TEST10',
+        referredBy: null,
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockOverview);
@@ -198,21 +210,22 @@ describe('UserAccess', () => {
 
     it('should return overview with all fields', async () => {
       const mockOverview: ReferralOverview = {
-        totalReferrals: 25,
-        activeReferrals: 15,
-        totalRewards: 1250,
+        referralCount: 25,
+        ranking: 1,
+        referralLink: 'https://frontiertower.io/r/JANE25',
+        referralCode: 'JANE25',
+        referredBy: 'john@example.com',
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(mockOverview);
 
       const result = await userAccess.getReferralOverview();
 
-      expect(result).toHaveProperty('totalReferrals');
-      expect(result).toHaveProperty('activeReferrals');
-      expect(result).toHaveProperty('totalRewards');
-      expect(result.totalReferrals).toBe(25);
-      expect(result.activeReferrals).toBe(15);
-      expect(result.totalRewards).toBe(1250);
+      expect(result.referralCount).toBe(25);
+      expect(result.ranking).toBe(1);
+      expect(result.referralLink).toBe('https://frontiertower.io/r/JANE25');
+      expect(result.referralCode).toBe('JANE25');
+      expect(result.referredBy).toBe('john@example.com');
     });
 
     it('should throw error if not authenticated', async () => {
@@ -228,17 +241,18 @@ describe('UserAccess', () => {
         count: 2,
         results: [
           {
-            id: 'ref1',
+            name: 'User One',
             email: 'user1@example.com',
+            referralDate: '2024-01-01T00:00:00Z',
+            reward: '50',
             status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            reward: 50,
           },
           {
-            id: 'ref2',
+            name: 'User Two',
             email: 'user2@example.com',
+            referralDate: '2024-01-02T00:00:00Z',
+            reward: '0',
             status: 'pending',
-            createdAt: '2024-01-02T00:00:00Z',
           },
         ],
       };
@@ -258,11 +272,11 @@ describe('UserAccess', () => {
         count: 50,
         results: [
           {
-            id: 'ref21',
+            name: 'User Twenty-One',
             email: 'user21@example.com',
+            referralDate: '2024-01-21T00:00:00Z',
+            reward: '50',
             status: 'active',
-            createdAt: '2024-01-21T00:00:00Z',
-            reward: 50,
           },
         ],
       };
@@ -300,8 +314,7 @@ describe('UserAccess', () => {
   describe('addUserContact', () => {
     it('should add user contact information', async () => {
       const contactData: UserContactPayload = {
-        email: 'contact@example.com',
-        phoneNumber: '+1234567890',
+        contacts: [{ email: 'contact@example.com', phone: '+1234567890', name: 'Contact Person' }],
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(undefined);
@@ -311,9 +324,9 @@ describe('UserAccess', () => {
       expect(mockSDK.request).toHaveBeenCalledWith('user:addUserContact', contactData);
     });
 
-    it('should handle contact data with only email', async () => {
+    it('should handle an empty contact list', async () => {
       const contactData: UserContactPayload = {
-        email: 'newemail@example.com',
+        contacts: [],
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(undefined);
@@ -323,12 +336,12 @@ describe('UserAccess', () => {
       expect(mockSDK.request).toHaveBeenCalledWith('user:addUserContact', contactData);
     });
 
-    it('should handle contact data with additional fields', async () => {
+    it('should handle multiple contacts', async () => {
       const contactData: UserContactPayload = {
-        email: 'contact@example.com',
-        phoneNumber: '+1234567890',
-        preferredContact: 'email',
-        notes: 'Important contact',
+        contacts: [
+          { email: 'alice@example.com', phone: '+1234567890', name: 'Alice' },
+          { email: 'bob@example.com', phone: '+1987654321', name: 'Bob' },
+        ],
       };
 
       vi.mocked(mockSDK.request).mockResolvedValue(undefined);
@@ -340,7 +353,7 @@ describe('UserAccess', () => {
 
     it('should throw error if not authenticated', async () => {
       const contactData: UserContactPayload = {
-        email: 'contact@example.com',
+        contacts: [{ email: 'contact@example.com', phone: '+1234567890', name: 'Contact Person' }],
       };
 
       vi.mocked(mockSDK.request).mockRejectedValue(new Error('Not authenticated'));
@@ -350,7 +363,7 @@ describe('UserAccess', () => {
 
     it('should throw error if data is invalid', async () => {
       const contactData: UserContactPayload = {
-        email: 'invalid-email',
+        contacts: [{ email: 'invalid-email', phone: '+1234567890', name: 'Contact Person' }],
       };
 
       vi.mocked(mockSDK.request).mockRejectedValue(new Error('Invalid email format'));
