@@ -37,7 +37,7 @@
   "author": "Frontier Tower",
   "license": "MIT",
   "devDependencies": {
-    "@vitest/ui": "^2.1.0",
+    "@vitest/ui": "^4.1.12",
     "happy-dom": "^21.0.4",
     "tsup": "^9.0.0",
     "typescript": "^5.3.3",
